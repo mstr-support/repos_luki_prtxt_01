@@ -22,9 +22,10 @@ st.set_page_config(
 # variable declaration
 #
 
+# model select -> can be dynamic in the future with a dropbox
 gpts_modl = "gpt-4.1-mini"
 
-
+# input prompt -> can be dynamic in the future with a text box
 inpt_prmt = (
     "Du bist ein erfahrener Werbetexter für Schuhe. "
     "Formuliere markante Teile der Modellbeschreibung und der Gruppenbeschreibung neu " 
@@ -139,6 +140,8 @@ with st.expander("Information"):
 # upoad butte for Excel file
 uploaded_file = st.file_uploader("Excel Datei mit Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
 
+# empty data frame for data
+df_org_data = None
 
 if uploaded_file:
     st.markdown(f"**Dateiname:** `{uploaded_file.name}`")
