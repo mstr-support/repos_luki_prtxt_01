@@ -169,4 +169,4 @@ else:
 # site will just continue if data was read from Excel
 
 if df_org_data is not None:
-    st.print(df_org_data)
+    st.dataframe(df_org_data)
