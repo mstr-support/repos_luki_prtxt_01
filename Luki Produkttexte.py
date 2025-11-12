@@ -167,6 +167,76 @@ else:
 
 #
 # site will just continue if data was read from Excel
+#
 
 if df_org_data is not None:
+    
     st.dataframe(df_org_data)
+
+    # button to start generation of produkttexte
+    if st.button("Produkttexte generieren"):
+
+        # initialisierung
+        client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
+        rows_indx = 0
+        df_output_data = []
+        
+        # loop
+        while rows_indx < len(df_org_data):
+            inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
+
+            inpt_vatr = ", ".join(
+                f"{col}: {val}"
+                for col, val in {
+                    "Produktname": df_org_data.loc[rows_indx, "Gruppe"],
+                    "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],         
+                    "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
+                    "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),
+                    "Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
+                    "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],
+                    "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle Eigenschaften"]),
+                    #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
+                    "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"]
+                }.items()
+                if pd.notna(val) and str(val).strip() != ""
+            )
+
+            final_prompt = f"""
+            {inpt_prmt}
+            Gruppenbeschreibung::
+            {inpt_grpb}
+            Attribute:
+            {inpt_vatr}
+            """
+
+            response = client.chat.completions.create(
+                model=gpts_modl,
+                messages=[
+                    {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
+                    {"role": "user", "content": final_prompt}
+                ],
+                temperature=0.5,
+                max_tokens=1000
+            )
+
+            #print(f"\n--- Zeile {rows_indx + 1} ---")
+            #print(response.choices[0].message.content)
+            text_output = response.choices[0].message.content    
+            modl = df_org_data["Modellnr"].iloc[rows_indx]
+            df_output_data.append({
+                "Modell": modl,
+                "Produkttext": text_output,
+                "Response_ID": response.id,
+                "Created_UTC": datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"),
+                "Model": response.model,
+                "Prompt_Tokens": response.usage.prompt_tokens,
+                "Completion_Tokens": response.usage.completion_tokens
+            })
+            print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
+            rows_indx += 1
+
+
+        st.dataframe(df_output_data)
+
+
+    
