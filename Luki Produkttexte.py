@@ -180,7 +180,7 @@ if uploaded_file:
     if st.session_state.imported_file_name != uploaded_file.name:
         # file name changed -> new generation
         st.session_state.generation_done = False
-        
+
 
 else:
     st.info("Bitte eine Datei hochladen.")
@@ -195,12 +195,9 @@ if df_org_data is not None:
     
     st.dataframe(df_org_data)
 
-    st.write("session, generation:",st.session_state.generation_done)
-
     # check if generation was already done before and
     # take data from last execution
     if st.session_state.generation_done == True:
-        st.write("generierung schon getan, session wir ausgelesen")
         df_output_data = st.session_state.df_output_data
     
     
@@ -208,8 +205,6 @@ if df_org_data is not None:
 
     # button to start generation of produkttexte
     if st.button("Produkttexte generieren"):
-
-        st.write("Generierung gestartet")
 
         # initialisierung
         client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
@@ -272,23 +267,12 @@ if df_org_data is not None:
 
         # transform list to dataframe for Excel export
         df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
-
-        st.write("Generierung fertig, sessio wird gesetzt")
-
         # save current result in session state
         st.session_state.df_output_data = df_output_data
         st.session_state.generation_done = True
 
-        st.write("session, generation:",st.session_state.generation_done)
-
-        if st.session_state.generation_done == True:
-            st.write("ist True")
-
-    st.write("Prüfung ob DF Output daten hat")
-
+    
     if df_output_data is not None:
-
-        st.write("Ausgabe + Button")
 
         # write output
         st.success("Produkttexte erfolgreich generiert.")
