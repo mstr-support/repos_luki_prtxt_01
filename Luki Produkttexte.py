@@ -162,6 +162,8 @@ else:
 
 
 
-# show data of Excel file 
+#
+# site will just continue if data was read from Excel
 
-st.print(df_org_data)
+if df_org_data is not None:
+    st.print(df_org_data)
