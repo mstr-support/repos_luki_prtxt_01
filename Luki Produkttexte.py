@@ -272,6 +272,9 @@ if df_org_data is not None:
 
         st.write("session, generation:",st.session_state.generation_done)
 
+        if st.session_state.generation_done == True:
+            st.write("ist True")
+
     st.write("Prüfung ob DF Output daten hat")
 
     if df_output_data is not None:
