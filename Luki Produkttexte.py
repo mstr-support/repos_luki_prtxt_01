@@ -182,6 +182,9 @@ if uploaded_file:
 
         st.session_state.imported_file_name = uploaded_file.name
 
+        # records with already existing Produkttext are filtered
+        df_org_data = df_org_data["Produkttext"].isna()
+
     except Exception as e:
         st.error(f"Fehler beim Einlesen: {e}")
 
