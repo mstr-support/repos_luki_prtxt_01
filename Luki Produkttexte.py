@@ -44,4 +44,4 @@ st.set_page_config(
 # content
 # 
 
-"Hallo, das ist die Luki Produkttexte App"
+"Hallo, das ist die Luki Produkttexte App. Mit einer Änderung."
