@@ -129,6 +129,8 @@ if "generation_done" not in st.session_state:
     st.session_state.generation_done = False
 if "df_output_data" not in st.session_state:
     st.session_state.df_output_data = None
+if "imported_file_name" not in st.session_state:
+    st.session_state.imported_file_name = None
 
 
 
@@ -167,11 +169,18 @@ if uploaded_file:
             df_org_data = pd.read_excel(uploaded_file, sheet_name=0, engine="openpyxl")
             st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
 
-        # reset session state for generation
-        st.session_state.generation_done = False
+        st.session_state.imported_file_name = uploaded_file.name
 
     except Exception as e:
         st.error(f"Fehler beim Einlesen: {e}")
+
+
+    # check if the file is still the same like in the session state
+    # -> file is always transformed to data frame of the code
+    if st.session_state.imported_file_name != uploaded_file.name:
+        # file name changed -> new generation
+        st.session_state.generation_done = False
+        
 
 else:
     st.info("Bitte eine Datei hochladen.")
