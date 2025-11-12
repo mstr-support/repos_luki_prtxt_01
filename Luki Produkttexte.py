@@ -134,7 +134,6 @@ if "imported_file_name" not in st.session_state:
 
 
 # logo on page right
-st.image("images/logo_large_leg.png", width=200)
 col1, col2 = st.columns([4, 1])  # links mehr Platz, rechts kleiner
 with col2:
     st.image("images/logo_large_leg.png", width=200)
