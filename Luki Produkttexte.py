@@ -43,6 +43,17 @@ inpt_prmt = (
     "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "
 )
 
+# columns, of the Excel file
+required_columns = [
+    "Marke", "Gruppe", "Saison", "Modellnr", "Gruppenbeschreibung", "Modellbeschreibung",
+    "Produkttext", "Selling Point 1", "Selling Point 2", "Selling Point 3", "Selling Point 4",
+    "Selling Point 5", "Geschlecht", "Unisex", "Kategorie", "Produkttyp OS", "Verschluss",
+    "Schuhweite", "Membrane", "Laufsohle Eigenschaften", "Laufsohle", "Profil Laufsohle",
+    "Absatzart", "Absatzhöhe", "Form Schuhspitze", "Nachhaltigkeit", "Barfussschuh",
+    "Wechselfußbett", "Decksohle", "Futtermaterial", "Futter Detail", "Zertifikate",
+    "Leuchtendes Motiv", "Non-marking Sohle", "Wasserbeständig", "Made in Europe"
+]
+
 
 # fixed replacement for speficif values
 
@@ -198,112 +209,127 @@ else:
 
 if df_org_data is not None:
 
-    # check if still data in dataframe after filterung
+    # check for errors
+    col_error = False
+
+    for col in required_columns:
+        if col not in df_org_data.columns:
+            st.error("Folgende Spalte fehlt in der Excel-Datei:", col)
+            col_error = True
+
+
+    # check if still data in dataframe after filterung for empty Produkttexte
     if len(df_org_data) == 0:
         st.error("Alle Produkttexte in hochgeladener Datei bereits befüllt.")
-    else:
-        
-        st.dataframe(df_org_data)
+        col_error = True
+
+    # stop generation if a error in the data was recognized
+    if col_error == True:
+        st.stop()
+
+
+
+    st.dataframe(df_org_data)
+
+    # check if generation was already done before and
+    # take data from last execution
+    if st.session_state.generation_done == True:
+        df_output_data = st.session_state.df_output_data
     
-        # check if generation was already done before and
-        # take data from last execution
-        if st.session_state.generation_done == True:
-            df_output_data = st.session_state.df_output_data
+    
+
+
+    # button to start generation of produkttexte
+    if st.button("Produkttexte generieren"):
+
+        # initialisierung
+        client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
+        rows_indx = 0
+        list_output_data = []
         
-        
+        # loop
+        while rows_indx < len(df_org_data):
+            inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
 
-
-        # button to start generation of produkttexte
-        if st.button("Produkttexte generieren"):
-
-            # initialisierung
-            client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
-            rows_indx = 0
-            list_output_data = []
-            
-            # loop
-            while rows_indx < len(df_org_data):
-                inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
-
-                inpt_vatr = ", ".join(
-                    f"{col}: {val}"
-                    for col, val in {
-                        "Produktname": df_org_data.loc[rows_indx, "Gruppe"],
-                        "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],         
-                        "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
-                        "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),
-                        "Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
-                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],
-                        "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle Eigenschaften"]),
-                        #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
-                        "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"]
-                    }.items()
-                    if pd.notna(val) and str(val).strip() != ""
-                )
-
-                final_prompt = f"""
-                {inpt_prmt}
-                Gruppenbeschreibung::
-                {inpt_grpb}
-                Attribute:
-                {inpt_vatr}
-                """
-
-                response = client.chat.completions.create(
-                    model=gpts_modl,
-                    messages=[
-                        {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
-                        {"role": "user", "content": final_prompt}
-                    ],
-                    temperature=0.5,
-                    max_tokens=1000
-                )
-
-                #print(f"\n--- Zeile {rows_indx + 1} ---")
-                #print(response.choices[0].message.content)
-                text_output = response.choices[0].message.content    
-                modl = df_org_data["Modellnr"].iloc[rows_indx]
-                list_output_data.append({
-                    "Modell": modl,
-                    "Produkttext": text_output,
-                    "Response_ID": response.id,
-                    "Created_UTC": datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"),
-                    "Model": response.model,
-                    "Prompt_Tokens": response.usage.prompt_tokens,
-                    "Completion_Tokens": response.usage.completion_tokens
-                })
-                print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
-                rows_indx += 1
-
-            # transform list to dataframe for Excel export
-            df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
-            # save current result in session state
-            st.session_state.df_output_data = df_output_data
-            st.session_state.generation_done = True
-
-        
-        if df_output_data is not None:
-
-            # write output
-            st.success("Produkttexte erfolgreich generiert.")
-            st.dataframe(df_output_data.drop('Produkttext',axis=1))
-
-            # prepare Excel Download
-            buffer = BytesIO()
-            with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-                df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
-            buffer.seek(0)
-
-            # create timestamp for filename
-            timestamp = datetime.now().strftime("%Y%m%d")
-            filename = f"Produkttexte_{timestamp}.xlsx"
-
-            # Download button
-            st.download_button(
-                label="Als Excel herunterladen",
-                data=buffer,
-                file_name=filename,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            inpt_vatr = ", ".join(
+                f"{col}: {val}"
+                for col, val in {
+                    "Produktname": df_org_data.loc[rows_indx, "Gruppe"],
+                    "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],         
+                    "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
+                    "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),
+                    "Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
+                    "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],
+                    "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle Eigenschaften"]),
+                    #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
+                    "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"]
+                }.items()
+                if pd.notna(val) and str(val).strip() != ""
             )
 
+            final_prompt = f"""
+            {inpt_prmt}
+            Gruppenbeschreibung::
+            {inpt_grpb}
+            Attribute:
+            {inpt_vatr}
+            """
+
+            response = client.chat.completions.create(
+                model=gpts_modl,
+                messages=[
+                    {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
+                    {"role": "user", "content": final_prompt}
+                ],
+                temperature=0.5,
+                max_tokens=1000
+            )
+
+            #print(f"\n--- Zeile {rows_indx + 1} ---")
+            #print(response.choices[0].message.content)
+            text_output = response.choices[0].message.content    
+            modl = df_org_data["Modellnr"].iloc[rows_indx]
+            list_output_data.append({
+                "Modell": modl,
+                "Produkttext": text_output,
+                "Response_ID": response.id,
+                "Created_UTC": datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"),
+                "Model": response.model,
+                "Prompt_Tokens": response.usage.prompt_tokens,
+                "Completion_Tokens": response.usage.completion_tokens
+            })
+            print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
+            rows_indx += 1
+
+        # transform list to dataframe for Excel export
+        df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
+        # save current result in session state
+        st.session_state.df_output_data = df_output_data
+        st.session_state.generation_done = True
+
     
+    if df_output_data is not None:
+
+        # write output
+        st.success("Produkttexte erfolgreich generiert.")
+        st.dataframe(df_output_data.drop('Produkttext',axis=1))
+
+        # prepare Excel Download
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
+        buffer.seek(0)
+
+        # create timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d")
+        filename = f"Produkttexte_{timestamp}.xlsx"
+
+        # Download button
+        st.download_button(
+            label="Als Excel herunterladen",
+            data=buffer,
+            file_name=filename,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+
