@@ -157,12 +157,15 @@ with st.expander("Information"):
 
             st.markdown("""
                   <p>
-                  Hier kann etwas Text für eine Erklärung hin
-                  
-                  </p>
+                  Willkommen in der App zur Automatischen Erstellung von Produkttexten. Diese wurde im Rahmen des LUKI-Projektes erstellt und generiert automatisch Texte für Modelle. Unter "Upload File" kannst du die zu verarbeitenden Modelle hochladen, das Excel muss dem Format des IPIM-Exportes "IPIM_Produkttexte" entsprechen. Die Verarbeitung in der App dauert einige Sekunden bis Minuten, dass sie arbeitet siehst du am Symbol am rechten oberen Bildschirmrand. 
+                  </p> <p>                 
+                  Bitte lade in dieser Testphase nicht mehr als 50 Modelle auf einmal hoch. 
+                  </p> <p>
+                  Viel Spaß!</p> <p> </p>
+                  Robert
+                  <p> </p>
                   """, unsafe_allow_html=True)
             
-
 
 # upoad butte for Excel file
 uploaded_file = st.file_uploader("Excel Datei mit Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
