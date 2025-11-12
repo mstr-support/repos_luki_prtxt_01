@@ -214,7 +214,7 @@ if df_org_data is not None:
 
     for col in required_columns:
         if col not in df_org_data.columns:
-            st.error("Folgende Spalte fehlt in der Excel-Datei:", col)
+            st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
             col_error = True
 
 
