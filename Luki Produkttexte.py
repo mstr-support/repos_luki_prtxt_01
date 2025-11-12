@@ -191,12 +191,6 @@ if uploaded_file:
 else:
     st.info("Bitte eine Datei hochladen.")
 
-# check if still data in dataframe after filterung
-if len(df_org_data) == 0:
-    st.error("Alle Produkttexte in hochgeladener Datei bereits befüllt.")
-else:
-    st.dataframe(df_org_data)
-
 
 #
 # site will just continue if data was read from Excel
