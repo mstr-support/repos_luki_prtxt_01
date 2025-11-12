@@ -194,6 +194,8 @@ else:
 # check if still data in dataframe after filterung
 if len(df_org_data) == 0:
     st.error("Alle Produkttexte in hochgeladener Datei bereits befüllt.")
+else:
+    st.dataframe(df_org_data)
 
 
 #
@@ -202,9 +204,7 @@ if len(df_org_data) == 0:
 
 if df_org_data is not None and len(df_org_data) > 0:
     
-    st.dataframe(df_org_data)
-
-    # check if generation was already done before and
+        # check if generation was already done before and
     # take data from last execution
     if st.session_state.generation_done == True:
         df_output_data = st.session_state.df_output_data
