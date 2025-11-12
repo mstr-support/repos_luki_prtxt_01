@@ -4,6 +4,7 @@ import streamlit.components.v1 as components
 from openai import OpenAI
 from datetime import datetime
 import pandas as pd
+from io import BytesIO
 
 
 #helper functions
@@ -13,7 +14,7 @@ import pandas as pd
 st.set_page_config(
          layout="wide",
          page_title="Luki Produkttexte",
-         page_icon="images/logo_large_leg.png",
+         page_icon="images/legero_klein.png",
          initial_sidebar_state ="expanded"
                )
 
@@ -236,7 +237,25 @@ if df_org_data is not None:
             rows_indx += 1
 
 
+        st.success("Produkttexte erfolgreich generiert.")
         st.dataframe(df_output_data)
 
+        # prepare Excel Download
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df_output_data.to_excel(writer, index=False, sheet_name="Sheet1")
+        buffer.seek(0)
+
+        # create timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d")
+        filename = f"Produkttexte_{timestamp}.xlsx"
+
+        # Download button
+        st.download_button(
+            label="Als Excel herunterladen",
+            data=buffer,
+            file_name=filename,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
     
