@@ -279,7 +279,7 @@ if df_org_data is not None:
 
         # write output
         st.success("Produkttexte erfolgreich generiert.")
-        st.dataframe(df_output_data)
+        st.dataframe(df_output_data.drop('Produkttext'))
 
         # prepare Excel Download
         buffer = BytesIO()
