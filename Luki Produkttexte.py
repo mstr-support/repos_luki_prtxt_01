@@ -158,6 +158,12 @@ df_output_data = None
 if uploaded_file:
     st.markdown(f"**Dateiname:** `{uploaded_file.name}`")
 
+    # check if the file is still the same like in the session state
+    # -> file is always transformed to data frame of the code
+    if st.session_state.imported_file_name != uploaded_file.name:
+        # file name changed -> new generation
+        st.session_state.generation_done = False
+
     try:
         # CSV einlesen
         if uploaded_file.name.lower().endswith(".csv"):
@@ -173,14 +179,6 @@ if uploaded_file:
 
     except Exception as e:
         st.error(f"Fehler beim Einlesen: {e}")
-
-
-    # check if the file is still the same like in the session state
-    # -> file is always transformed to data frame of the code
-    if st.session_state.imported_file_name != uploaded_file.name:
-        # file name changed -> new generation
-        st.session_state.generation_done = False
-
 
 else:
     st.info("Bitte eine Datei hochladen.")
