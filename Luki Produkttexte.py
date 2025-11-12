@@ -186,6 +186,8 @@ if df_org_data is not None:
     
     st.dataframe(df_org_data)
 
+    st.write("session, generation:",st.session_state.generation_done)
+
     # check if generation was already done before and
     # take data from last execution
     if st.session_state.generation_done == True:
