@@ -13,7 +13,7 @@ from io import BytesIO
 
 st.set_page_config(
          layout="wide",
-         page_title="Luki Produkttexte",
+         page_title="[LUKI] Produkttexte",
          page_icon="images/legero_klein.png",
          initial_sidebar_state ="expanded"
                )
@@ -121,10 +121,18 @@ def fnct_lfso(saison: str, laufsohle: str) -> str:
 
 #
 # content
-# 
+#
 
-st.title("Luki Produkttexte")
 
+# check session variables, whether a generation was already done
+if "generation_done" not in st.session_state:
+    st.session_state.generation_done = False
+if "df_output_data" not in st.session_state:
+    st.session_state.df_output_data = None
+
+
+
+st.title("[LUKI] Produkttexte")
 
 with st.expander("Information"):
             
@@ -143,6 +151,7 @@ uploaded_file = st.file_uploader("Excel Datei mit Produkttexten auswählen", acc
 
 # empty data frame for data
 df_org_data = None
+df_output_data = None
 
 if uploaded_file:
     st.markdown(f"**Dateiname:** `{uploaded_file.name}`")
@@ -153,10 +162,13 @@ if uploaded_file:
             df_org_data = pd.read_csv(uploaded_file)
             st.success("CSV erfolgreich geladen.")
 
-        # Excel: immer erstes Sheet einlesen
+        # Read always first sheet of Excelfile
         else:
             df_org_data = pd.read_excel(uploaded_file, sheet_name=0, engine="openpyxl")
             st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
+
+        # reset session state for generation
+        st.session_state.generation_done = False
 
     except Exception as e:
         st.error(f"Fehler beim Einlesen: {e}")
@@ -173,6 +185,14 @@ else:
 if df_org_data is not None:
     
     st.dataframe(df_org_data)
+
+    # check if generation was already done before and
+    # take data from last execution
+    if st.session_state.generation_done == True:
+        df_output_data = st.session_state.df_output_data
+    
+    
+
 
     # button to start generation of produkttexte
     if st.button("Produkttexte generieren"):
@@ -239,6 +259,14 @@ if df_org_data is not None:
         # transform list to dataframe for Excel export
         df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
 
+        # save current result in session state
+        st.session_state.df_output_data = df_output_data
+        st.session_state.generation_done = True
+
+
+    if df_output_data is not None:
+
+        # write output
         st.success("Produkttexte erfolgreich generiert.")
         st.dataframe(df_output_data)
 
