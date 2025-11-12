@@ -180,7 +180,7 @@ if df_org_data is not None:
         # initialisierung
         client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
         rows_indx = 0
-        df_output_data = []
+        list_output_data = []
         
         # loop
         while rows_indx < len(df_org_data):
@@ -224,7 +224,7 @@ if df_org_data is not None:
             #print(response.choices[0].message.content)
             text_output = response.choices[0].message.content    
             modl = df_org_data["Modellnr"].iloc[rows_indx]
-            df_output_data.append({
+            list_output_data.append({
                 "Modell": modl,
                 "Produkttext": text_output,
                 "Response_ID": response.id,
@@ -236,6 +236,8 @@ if df_org_data is not None:
             print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
             rows_indx += 1
 
+        # transform list to dataframe for Excel export
+        df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
 
         st.success("Produkttexte erfolgreich generiert.")
         st.dataframe(df_output_data)
@@ -243,7 +245,7 @@ if df_org_data is not None:
         # prepare Excel Download
         buffer = BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-            df_output_data.to_excel(writer, index=False, sheet_name="Sheet1")
+            df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
         buffer.seek(0)
 
         # create timestamp for filename
