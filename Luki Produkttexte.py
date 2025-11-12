@@ -133,6 +133,7 @@ if "imported_file_name" not in st.session_state:
     st.session_state.imported_file_name = None
 
 
+st.image("images/logo_large_leg.png, width=200)
 
 st.title("[LUKI] Produkttexte")
 
