@@ -257,7 +257,7 @@ if df_org_data is not None:
             while rows_indx < len(df_org_data):
                 inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
 
-                st.write(df_org_data)
+                st.write(rows_indx)
 
                 inpt_vatr = ", ".join(
                     f"{col}: {val}"
