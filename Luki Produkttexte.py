@@ -259,6 +259,7 @@ if df_org_data is not None:
             for rows_indx in df_org_data.index:
 
                 st.write(rows_indx)
+                st.write(df_org_data.loc[rows_indx, "Modellbeschreibung"])
             
             # while rows_indx < len(df_org_data):
                 inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
