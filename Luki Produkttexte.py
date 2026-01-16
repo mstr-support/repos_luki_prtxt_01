@@ -200,6 +200,9 @@ if uploaded_file:
         # records with already existing Produkttext are filtered
         df_org_data = df_org_data[df_org_data["Produkttext"].isna()]
 
+        # reset index after drop of rows
+        df_org_data = df_org_data.reset_index(drop=True)
+
     except Exception as e:
         st.error(f"Fehler beim Einlesen: {e}")
 
