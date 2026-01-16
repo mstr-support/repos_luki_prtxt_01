@@ -251,7 +251,7 @@ if df_org_data is not None:
         rows_indx = 0
         list_output_data = []
 
-        st.write(df_org_data)
+        
         
         # loop
         with st.spinner("Produkttexte werden generiert...", show_time=True):
