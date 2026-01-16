@@ -256,7 +256,9 @@ if df_org_data is not None:
         # loop
         with st.spinner("Produkttexte werden generiert...", show_time=True):
 
-            while rows_indx < len(df_org_data):
+            for rows_indx in df_org_data.index:
+            
+            # while rows_indx < len(df_org_data):
                 inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
 
                 #st.write(rows_indx)
