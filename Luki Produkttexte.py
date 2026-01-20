@@ -45,7 +45,7 @@ inpt_prmt = (
 
 # columns, of the Excel file
 required_columns = [
-    "Marke", "Gruppe", "Modellnr", "Gruppenbeschreibung", "Modellbeschreibung",
+    "Marke", "Gruppe", "Saison", "Modellnr", "Gruppenbeschreibung", "Modellbeschreibung",
     "Produkttext", "Selling Point 1", "Selling Point 2", "Selling Point 3", "Selling Point 4",
     "Selling Point 5", "Geschlecht", "Unisex", "Kategorie", "Produkttyp OS", "Verschluss",
     "Schuhweite", "Membrane", "Laufsohle Eigenschaften", "Laufsohle", "Profil Laufsohle",
