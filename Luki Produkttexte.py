@@ -440,7 +440,7 @@ if df_org_data is not None:
                         "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),
                         "Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
                         "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],
-                        "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle"]),
+                        "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle"], df_org_data.loc[rows_indx, "Marke"]),
                         #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
                         "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"]
                     }.items()
