@@ -465,7 +465,11 @@ if df_org_data is not None:
 
                 #print(f"\n--- Zeile {rows_indx + 1} ---")
                 #print(response.choices[0].message.content)
-                text_output = response.choices[0].message.content    
+                text_output = response.choices[0].message.content  
+
+                # Gore Tex in Ergebnis anpassen
+                text_output = fnct_ptxt(text_output)
+
                 modl = df_org_data["Modellnr"].iloc[rows_indx]
                 list_output_data.append({
                     "Modell": modl,
