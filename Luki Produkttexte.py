@@ -429,8 +429,6 @@ if df_org_data is not None:
 
             for rows_indx in df_org_data.index:
                         
-                inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
-
                 #st.write(rows_indx)
 
                 inpt_vatr = ", ".join(
@@ -450,9 +448,7 @@ if df_org_data is not None:
                 )
 
                 final_prompt = f"""
-                {inpt_prmt}
-                Gruppenbeschreibung::
-                {inpt_grpb}
+                {inpt_prmt}                
                 Attribute:
                 {inpt_vatr}
                 """
