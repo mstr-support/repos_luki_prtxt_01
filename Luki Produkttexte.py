@@ -30,7 +30,7 @@ gpts_modl = "gpt-4.1-mini"
 inpt_prmt = (
     "Du bist ein erfahrener Werbetexter für Schuhe. "
     "Formuliere markante Teile der Modellbeschreibung und der Leistenbeschreibung neu " 
-    "um den Charakter des Schuhs hervorzuheben. Erwähne Gruppe und Produkttyp_OS im ersten Satz. "     
+    "um den Charakter des Schuhs hervorzuheben. Erwähne Produktname und Produkttyp_OS im ersten Satz. "     
     "Ergänze den Text um relevante Attribute, damit er informativ, emotional ansprechend wirkt. "
     "Achte auf eine natürliche, menschlich klingende Sprache und eine SEO-optimierte "
     "Formulierung. Vermeide Aufzählungen, Wortwiederholungen und übermäßig werbliche Floskeln. "
