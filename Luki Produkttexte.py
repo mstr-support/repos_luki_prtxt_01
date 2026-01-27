@@ -269,14 +269,12 @@ def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
 
 #Funktion Produkttext
 def fnct_ptxt(text: str) -> str:
-    if pd.isna(text):
-        return None
-    text = str(text).strip().lower()
-    if text == "goretex":
-        return "GORE-TEX®"
-    if text == "gore tex":
-        return "GORE-TEX®"
-    return None
+    
+    # Gore Tex ersetzen
+    v_rplc_text = text.replace('GoreTex',"GORE-TEX®")
+    v_rplc_text = v_rplc_text.replace('Gore Tex',"GORE-TEX®")
+        
+    return v_rplc_text
 
 
 
