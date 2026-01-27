@@ -45,11 +45,11 @@ inpt_prmt = (
 
 # columns, of the Excel file
 required_columns = [
-    "Marke", "Gruppe", "Saison", "Modellnr", "Gruppenbeschreibung", "Modellbeschreibung",
-    "Produkttext", "Selling Point 1", "Selling Point 2", "Selling Point 3", "Selling Point 4",
-    "Selling Point 5", "Geschlecht", "Unisex", "Kategorie", "Produkttyp OS", "Verschluss",
-    "Schuhweite", "Membrane", "Laufsohle Eigenschaften", "Laufsohle", "Profil Laufsohle",
-    "Absatzart", "Absatzhöhe", "Form Schuhspitze", "Nachhaltigkeit", "Barfussschuh",
+    "Marke", "Gruppe", "Saison", "Modellnr", "Leistenbeschreibung", "Modellbeschreibung",
+    "Produkttext", 
+    "Geschlecht", "Produkttyp OS", "Verschluss",
+    "Schuhweite", "Membrane", "Laufsohle",
+    "Absatzart", "Form Schuhspitze", "Nachhaltigkeit", "Barfussschuh",
     "Wechselfußbett", "Decksohle", "Futtermaterial", "Futter Detail", "Zertifikate",
     "Leuchtendes Motiv", "Non-marking Sohle", "Wasserbeständig", "Made in Europe"
 ]
@@ -103,13 +103,181 @@ def fnct_pfls(text: str) -> str:
         return "Stark ausgeprägtes Profil"
     return None
 
-#Funktion Laufsohleneigneschaften FS <> rutschhemmend
-def fnct_lfso(saison: str, laufsohle: str) -> str:
+#Funktion laufsohleneigenschaft erzeugen
+def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
     if pd.isna(laufsohle):
         return laufsohle
+    # Sommersaison
     if str(saison).strip().upper().startswith("FS"):
-        return str(laufsohle).replace("rutschhemmend", "").strip()
-    return laufsohle
+
+        #Marke unterscheiden
+        if str(marke).strip().upper().startswith("SUPERFIT"):
+
+            # Laufsohle unterscheiden
+            if str(laufsohle).strip().upper().startswith("PU"):
+                return "flexibel, leicht, hoher Tragekomfort"
+            
+            elif str(laufsohle).strip().upper().startswith("TPU"):
+                return "optimaler Grip, rutschhemmend, abriebfest"
+
+            elif str(laufsohle).strip().upper().startswith("TPR"):
+                return "rutschhemmend, flexibel"
+            
+            elif str(laufsohle).strip().upper().startswith("GUMMI"):
+                return "abriebfest, rutschhemmend, flexibel"
+            
+            elif str(laufsohle).strip().upper().startswith("PVC"):
+                return "nicht abfärbend, flexibel, leicht"
+            
+            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
+                return "aus nachwachsendem Rohstoff, flexibel, natürliche Abrollbewegung"
+            
+            elif str(laufsohle).strip().upper().startswith("EVA"):
+                return "sehr leicht, flexibel, hoher Tragekomfort"
+            
+            elif str(laufsohle).strip().upper().startswith("PHYLON"):
+                return "sehr leicht, flexibel, hoher Tragekomfort"
+            
+            else:
+                return ""
+            
+        elif str(marke).strip().upper().startswith("LEGERO"):
+
+            # Laufsohle unterscheiden
+            if str(laufsohle).strip().upper().startswith("PU"):
+                return "flexibel, leicht, hoher Tragekomfort"
+            
+            elif str(laufsohle).strip().upper().startswith("TPU"):
+                return "optimaler Grip, rutschhemmend, abriebfest"
+            
+            else:
+                return ""
+
+        elif str(marke).strip().upper().startswith("THINK"):
+
+            # Laufsohle unterscheiden
+            if str(laufsohle).strip().upper().startswith("PU"):
+                return "leicht, stoßabsorbierend, dämpfend"
+            
+            elif str(laufsohle).strip().upper().startswith("TPU"):
+                return "elastisch, abriebfest, stabil"
+            
+            elif str(laufsohle).strip().upper().startswith("GUMMI"):
+                return "flexibel, abriebfest, rutschhemmend"
+            
+            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
+                return "dämpfend, flexibel, aus nachwachsendem Rohstoff"
+            
+            elif str(laufsohle).strip().upper().startswith("EVA"):
+                return "flexibel, dämpfend, leicht"
+            
+            elif str(laufsohle).strip().upper().startswith("BLOWTECH"):
+                return "dämpfend, leicht, rutschhemmend"
+            
+            elif str(laufsohle).strip().upper().startswith("LIGHT GUM"):
+                return "dämpfend, leicht, rutschhemmend"
+
+            else:
+                return ""
+
+        else:
+            return ""
+    
+    # Wintersaison
+    elif str(saison).strip().upper().startswith("HW"):
+
+        #Marke unterscheiden
+        if str(marke).strip().upper().startswith("SUPERFIT"):
+
+            # Laufsohle unterscheiden
+            if str(laufsohle).strip().upper().startswith("PU"):
+                return "isolierend, rutschhemmend, hoher Tragekomfort"
+            
+            elif str(laufsohle).strip().upper().startswith("TPU"):
+                return "optimaler Grip, rutschhemmend, abriebfest, kälte-und witterungsbeständig"
+
+            elif str(laufsohle).strip().upper().startswith("TPR"):
+                return "rutschhemmend, flexibel"
+            
+            elif str(laufsohle).strip().upper().startswith("GUMMI"):
+                return "abriebfest, rutschhemmend, flexibel"
+            
+            elif str(laufsohle).strip().upper().startswith("PVC"):
+                return "nicht abfärbend, flexibel, leicht"
+            
+            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
+                return "aus nachwachsendem Rohstoff, flexibel, natürliche Abrollbewegung"
+            
+            elif str(laufsohle).strip().upper().startswith("EVA"):
+                return "sehr leicht, Flexibilität auch bei Kälte, hoher Tragekomfort"
+            
+            elif str(laufsohle).strip().upper().startswith("PHYLON"):
+                return "sehr leicht, Flexibilität auch bei Kälte, hoher Tragekomfort"
+            
+            else:
+                return ""
+            
+        elif str(marke).strip().upper().startswith("LEGERO"):
+
+            # Laufsohle unterscheiden
+            if str(laufsohle).strip().upper().startswith("PU"):
+                return "flexibel, leicht, hoher Tragekomfort, rutschhemmend"
+            
+            elif str(laufsohle).strip().upper().startswith("TPU"):
+                return "optimaler Grip, rutschhemmend, abriebfest, kälte-und witterungsbeständig"
+            
+            else:
+                return ""
+
+        elif str(marke).strip().upper().startswith("THINK"):
+
+            # Laufsohle unterscheiden
+            if str(laufsohle).strip().upper().startswith("PU"):
+                return "leicht, stoßabsorbierend, dämpfend"
+            
+            elif str(laufsohle).strip().upper().startswith("TPU"):
+                return "elastisch, abriebfest, stabil"
+            
+            elif str(laufsohle).strip().upper().startswith("GUMMI"):
+                return "flexibel, abriebfest, rutschhemmend"
+            
+            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
+                return "dämpfend, flexibel, aus nachwachsendem Rohstoff"
+            
+            elif str(laufsohle).strip().upper().startswith("EVA"):
+                return "flexibel, dämpfend, leicht"
+            
+            elif str(laufsohle).strip().upper().startswith("BLOWTECH"):
+                return "dämpfend, leicht, rutschhemmend"
+            
+            elif str(laufsohle).strip().upper().startswith("LIGHT GUM"):
+                return "dämpfend, leicht, rutschhemmend"
+
+            else:
+                ## Leersting, wenn keine Auswahl zutrifft
+                return ""
+
+        else:
+            ## Leersting, wenn keine Auswahl zutrifft
+            return ""
+        
+    else:
+        ## Leersting, wenn keine Auswahl zutrifft
+        return ""
+
+
+
+#Funktion Produkttext
+def fnct_ptxt(text: str) -> str:
+    if pd.isna(text):
+        return None
+    text = str(text).strip().lower()
+    if text == "goretex":
+        return "GORE-TEX®"
+    if text == "gore tex":
+        return "GORE-TEX®"
+    return None
+
 
 
 # build config for authenticator
@@ -263,7 +431,7 @@ if df_org_data is not None:
                         
                 inpt_grpb = df_org_data["Gruppenbeschreibung"].iloc[rows_indx]
 
-                st.write(rows_indx)
+                #st.write(rows_indx)
 
                 inpt_vatr = ", ".join(
                     f"{col}: {val}"
