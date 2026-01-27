@@ -29,8 +29,8 @@ gpts_modl = "gpt-4.1-mini"
 # input prompt -> can be dynamic in the future with a text box
 inpt_prmt = (
     "Du bist ein erfahrener Werbetexter für Schuhe. "
-    "Formuliere markante Teile der Modellbeschreibung und der Gruppenbeschreibung neu " 
-    "um den Charakter des Schuhs hervorzuheben. Erwähne Produktname und Produkttyp im ersten Satz. "     
+    "Formuliere markante Teile der Modellbeschreibung und der Leistenbeschreibung neu " 
+    "um den Charakter des Schuhs hervorzuheben. Erwähne Gruppe und Produkttyp_OS im ersten Satz. "     
     "Ergänze den Text um relevante Attribute, damit er informativ, emotional ansprechend wirkt. "
     "Achte auf eine natürliche, menschlich klingende Sprache und eine SEO-optimierte "
     "Formulierung. Vermeide Aufzählungen, Wortwiederholungen und übermäßig werbliche Floskeln. "
@@ -511,5 +511,4 @@ if df_org_data is not None:
             file_name=filename,
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
 
