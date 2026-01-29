@@ -458,7 +458,7 @@ if df_org_data is not None:
                         {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
                         {"role": "user", "content": final_prompt}
                     ],
-                    temperature=0.5,
+                    temperature=0.4,
                     max_tokens=1000
                 )
 
