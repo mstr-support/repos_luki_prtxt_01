@@ -434,14 +434,15 @@ if df_org_data is not None:
                     f"{col}: {val}"
                     for col, val in {
                         "Produktname": df_org_data.loc[rows_indx, "Gruppe"],
-                        "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],         
+                        "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],     
+                        "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
                         "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
-                        "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),
                         #"Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
-                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],
                         "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle"], df_org_data.loc[rows_indx, "Marke"]),
                         #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
-                        "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"]
+                        "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"],
+                        "Gore-Tex": df_org_data.loc[rows_indx, "Membrane"]
+                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"]                        
                     }.items()
                     if pd.notna(val) and str(val).strip() != ""
                 )
