@@ -271,12 +271,13 @@ def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
 #Funktion Produkttext
 def fnct_ptxt(text: str) -> str:
     
-    # Gore Tex ersetzen
+    # Diverse Ersetzungen
     v_rplc_txt1 = text.replace('GoreTex',"GORE-TEX®")
     v_rplc_txt2 = v_rplc_txt1.replace('Gore Tex',"GORE-TEX®")
     v_rplc_txt3 = v_rplc_txt2.replace('Gore-Tex',"GORE-TEX®")
+    v_rplc_txt4 = v_rplc_txt3.replace('Außenzip',"Außenzipp")    
         
-    return v_rplc_txt3
+    return v_rplc_txt4
 
 
 
