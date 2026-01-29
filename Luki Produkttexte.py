@@ -441,7 +441,7 @@ if df_org_data is not None:
                         "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle"], df_org_data.loc[rows_indx, "Marke"]),
                         #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
                         "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"],
-                        "Gore-Tex": df_org_data.loc[rows_indx, "Membrane"]
+                        "Membrane": df_org_data.loc[rows_indx, "Membrane"],
                         "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"]                        
                     }.items()
                     if pd.notna(val) and str(val).strip() != ""
