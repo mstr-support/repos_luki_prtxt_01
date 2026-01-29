@@ -25,7 +25,7 @@ st.set_page_config(
 
 # model select -> can be dynamic in the future with a dropbox
 # gpts_modl = "gpt-4.1-mini"
-gpts_modl = "gpt-5.2"
+gpts_modl = "gpt-5-mini"
 
 # input prompt -> can be dynamic in the future with a text box
 inpt_prmt = (
