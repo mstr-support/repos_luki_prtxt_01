@@ -437,7 +437,7 @@ if df_org_data is not None:
                         "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],         
                         "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
                         "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),
-                        "Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
+                        #"Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
                         "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],
                         "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle"], df_org_data.loc[rows_indx, "Marke"]),
                         #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
@@ -458,8 +458,8 @@ if df_org_data is not None:
                         {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
                         {"role": "user", "content": final_prompt}
                     ],
-                    temperature=0.4,
-                    max_tokens=1000
+                    temperature=0.5,
+                    max_tokens=1200
                 )
 
                 #print(f"\n--- Zeile {rows_indx + 1} ---")
