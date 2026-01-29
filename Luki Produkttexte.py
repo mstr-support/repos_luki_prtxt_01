@@ -275,9 +275,10 @@ def fnct_ptxt(text: str) -> str:
     v_rplc_txt1 = text.replace('GoreTex',"GORE-TEX®")
     v_rplc_txt2 = v_rplc_txt1.replace('Gore Tex',"GORE-TEX®")
     v_rplc_txt3 = v_rplc_txt2.replace('Gore-Tex',"GORE-TEX®")
-    v_rplc_txt4 = v_rplc_txt3.replace('Außenzip',"Außenzipp")    
+    v_rplc_txt4 = v_rplc_txt3.replace('Außenzip',"Außenzipp")
+    v_rplc_txt5 = v_rplc_txt4.replace('Damen-Schuh',"Damenschuh")     
         
-    return v_rplc_txt4
+    return v_rplc_txt5
 
 
 
