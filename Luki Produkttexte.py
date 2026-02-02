@@ -28,15 +28,16 @@ st.set_page_config(
 gpts_modl = "gpt-5.2"
 
 
+
 # input prompt -> can be dynamic in the future with a text box
 inpt_prmt = (
     "Du bist ein erfahrener Werbetexter für Schuhe. "
-    "Formuliere markante Teile der Modellbeschreibung und der Gruppenbeschreibung neu " 
+    "Formuliere markante Teile der Modellbeschreibung und der Leistenbeschreibung neu " 
     "um den Charakter des Schuhs hervorzuheben. Erwähne Produktname und Produkttyp im ersten Satz. "     
     "Ergänze den Text um relevante Attribute, damit er informativ, emotional ansprechend wirkt. "
     "Achte auf eine natürliche, menschlich klingende Sprache und eine SEO-optimierte "
-    "Formulierung. Vermeide Aufzählungen, Wortwiederholungen und übermäßig werbliche Floskeln. "
-    "Halte die Textlänge zwischen 350-400 Zeichen, erwähne nie das Wort Leisten. "
+    "Formulierung. Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte "
+    "persönliche Ansprache. Halte die Textlänge zwischen 350-400 Zeichen, erwähne nie das Wort Leisten. "
     "Wenn möglich, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit (wenn befüllt) in einem Satz. "
     "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben"
     "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
@@ -272,11 +273,14 @@ def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
 #Funktion Produkttext
 def fnct_ptxt(text: str) -> str:
     
-    # Gore Tex ersetzen
-    v_rplc_text = text.replace('GoreTex',"GORE-TEX®")
-    v_rplc_text = v_rplc_text.replace('Gore Tex',"GORE-TEX®")
+    # Diverse Ersetzungen
+    v_rplc_txt1 = text.replace('GoreTex',"GORE-TEX®")
+    v_rplc_txt2 = v_rplc_txt1.replace('Gore Tex',"GORE-TEX®")
+    v_rplc_txt3 = v_rplc_txt2.replace('Gore-Tex',"GORE-TEX®")
+    v_rplc_txt4 = v_rplc_txt3.replace('Außenzip',"Außenzipp")
+    v_rplc_txt5 = v_rplc_txt4.replace('Damen-Schuh',"Damenschuh")     
         
-    return v_rplc_text
+    return v_rplc_txt5
 
 
 
@@ -435,14 +439,15 @@ if df_org_data is not None:
                     f"{col}: {val}"
                     for col, val in {
                         "Produktname": df_org_data.loc[rows_indx, "Gruppe"],
-                        "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],         
+                        "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],     
+                        "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
                         "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
-                        "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),
-                        "Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
-                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],
+                        #"Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
                         "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle"], df_org_data.loc[rows_indx, "Marke"]),
                         #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
-                        "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"]
+                        "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"],
+                        "Membrane": df_org_data.loc[rows_indx, "Membrane"],
+                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"]                        
                     }.items()
                     if pd.notna(val) and str(val).strip() != ""
                 )
@@ -460,7 +465,7 @@ if df_org_data is not None:
                         {"role": "user", "content": final_prompt}
                     ],
                     temperature=0.5,
-                    max_tokens=1000
+                    max_tokens=1200
                 )
 
                 #print(f"\n--- Zeile {rows_indx + 1} ---")
@@ -513,5 +518,4 @@ if df_org_data is not None:
             file_name=filename,
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
 
