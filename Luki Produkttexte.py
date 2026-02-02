@@ -465,6 +465,7 @@ if df_org_data is not None:
                         {"role": "user", "content": final_prompt}
                     ],
                     temperature=0.5
+
                     # tokens not needed for 5.2 model
                     #max_tokens=1200
                 )
