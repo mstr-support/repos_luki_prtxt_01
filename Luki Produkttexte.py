@@ -464,8 +464,9 @@ if df_org_data is not None:
                         {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
                         {"role": "user", "content": final_prompt}
                     ],
-                    temperature=0.5,
-                    max_tokens=1200
+                    temperature=0.5
+                    # tokens not needed for 5.2 model
+                    #max_tokens=1200
                 )
 
                 #print(f"\n--- Zeile {rows_indx + 1} ---")
