@@ -273,6 +273,9 @@ def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
         return ""
 
 
+#Funktion Wechselfußbett
+def fnct_wfub(wert: str) -> str:
+    return "Einlegesohle wechselbar" if wert.lower() == "ja" else "nicht erwähnen"
 
 #Funktion Produkttext
 def fnct_ptxt(text: str) -> str:
@@ -452,7 +455,8 @@ if df_org_data is not None:
                         "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"],
                         "Membrane": df_org_data.loc[rows_indx, "Membrane"],
                         "Futtermaterial": df_org_data.loc[rows_indx, "Futtermaterial"],                        
-                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"]                        
+                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],   
+                        "Einlegesohle": fnct_wfub(df_org_data.loc[rows_indx, "Wechselfußbett"])                                              
                     }.items()
                     if pd.notna(val) and str(val).strip() != ""
                 )
