@@ -5,6 +5,7 @@ from openai import OpenAI
 from datetime import datetime
 import pandas as pd
 from io import BytesIO
+import re
 
 
 #helper functions
@@ -275,18 +276,16 @@ def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
 
 #Funktion Produkttext
 def fnct_ptxt(text: str) -> str:
-    
-    # Diverse Ersetzungen
-    v_rplc_txt1 = text.replace('GoreTex',"GORE-TEX®")
-    v_rplc_txt2 = v_rplc_txt1.replace('Gore Tex',"GORE-TEX®")
-    v_rplc_txt3 = v_rplc_txt2.replace('Gore-Tex',"GORE-TEX®")
-    v_rplc_txt4 = v_rplc_txt3.replace('GORE-TEX',"GORE-TEX®")    
-    v_rplc_txt5 = v_rplc_txt4.replace('Außenzip',"Außenzipp")
-    v_rplc_txt6 = v_rplc_txt5.replace('Damen-Schuh',"Damenschuh")     
-        
-    return v_rplc_txt6
 
+    # Gore-Tex nur ersetzen, wenn es noch nicht korrekt ist
+    if "gore-tex®" not in text.lower():
+        text = re.sub(r"gore[\s-]?tex", "GORE-TEX®", text, flags=re.IGNORECASE)
 
+    # Diese Anpassungen immer durchführen
+    text = text.replace("Außenzip", "Außenzipp")
+    text = text.replace("Damen-Schuh", "Damenschuh")
+
+    return text
 
 # build config for authenticator
 # -> not needed here
