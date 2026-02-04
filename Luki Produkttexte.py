@@ -31,14 +31,17 @@ gpts_modl = "gpt-5.2"
 
 # input prompt -> can be dynamic in the future with a text box
 inpt_prmt = (
-    "Du bist ein erfahrener Werbetexter für Schuhe. "
-    "Formuliere markante Teile der Modellbeschreibung und der Leistenbeschreibung neu " 
-    "um den Charakter des Schuhs hervorzuheben. Erwähne Produktname und Produkttyp im ersten Satz. "     
-    "Ergänze den Text um relevante Attribute, damit er informativ, emotional ansprechend wirkt. "
-    "Achte auf eine natürliche, menschlich klingende Sprache und eine SEO-optimierte "
-    "Formulierung. Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte "
-    "persönliche Ansprache. Halte die Textlänge zwischen 350-400 Zeichen, erwähne nie das Wort Leisten. "
-    "Wenn möglich, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit (wenn befüllt) in einem Satz. "
+	"Du bist ein erfahrener Werbetexter mit Spezialisierung auf Schuhe."
+    "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
+    "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
+	"Neuformulieren ist optional; vorhandene Formulierungen dürfen übernommen werden."    
+	"Der erste Satz muss Produktname und Produkttyp enthalten."
+	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
+    "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
+	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
+    "Achte auf eine natürliche, menschlich klingende Sprache."
+    "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
+    "Halte die Textlänge zwischen 450-500 Zeichen, erwähne nie das Wort Leisten."
     "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben"
     "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
     "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
@@ -447,6 +450,7 @@ if df_org_data is not None:
                         #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
                         "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"],
                         "Membrane": df_org_data.loc[rows_indx, "Membrane"],
+                        "Futtermaterial": df_org_data.loc[rows_indx, "Futtermaterial"],                        
                         "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"]                        
                     }.items()
                     if pd.notna(val) and str(val).strip() != ""
