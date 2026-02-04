@@ -442,6 +442,7 @@ if df_org_data is not None:
                     f"{col}: {val}"
                     for col, val in {
                         "Produktname": df_org_data.loc[rows_indx, "Gruppe"],
+                        "Leistenbeschreibung": df_org_data.loc[rows_indx, "Leistenbeschreibung"],                             
                         "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],     
                         "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
                         "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
