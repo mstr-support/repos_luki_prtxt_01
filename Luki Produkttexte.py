@@ -41,7 +41,7 @@ inpt_prmt = (
 	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
     "Achte auf eine natürliche, menschlich klingende Sprache."
     "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
-    "Halte die Textlänge zwischen 450-500 Zeichen, erwähne nie das Wort Leisten."
+    "Halte die Textlänge zwischen 500-550 Zeichen, erwähne nie das Wort Leisten."
     "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben"
     "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
     "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
@@ -280,10 +280,11 @@ def fnct_ptxt(text: str) -> str:
     v_rplc_txt1 = text.replace('GoreTex',"GORE-TEX®")
     v_rplc_txt2 = v_rplc_txt1.replace('Gore Tex',"GORE-TEX®")
     v_rplc_txt3 = v_rplc_txt2.replace('Gore-Tex',"GORE-TEX®")
-    v_rplc_txt4 = v_rplc_txt3.replace('Außenzip',"Außenzipp")
-    v_rplc_txt5 = v_rplc_txt4.replace('Damen-Schuh',"Damenschuh")     
+    v_rplc_txt4 = v_rplc_txt3.replace('GORE-TEX',"GORE-TEX®")    
+    v_rplc_txt5 = v_rplc_txt4.replace('Außenzip',"Außenzipp")
+    v_rplc_txt6 = v_rplc_txt5.replace('Damen-Schuh',"Damenschuh")     
         
-    return v_rplc_txt5
+    return v_rplc_txt6
 
 
 
