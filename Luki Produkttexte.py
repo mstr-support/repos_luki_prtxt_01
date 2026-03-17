@@ -50,6 +50,15 @@ inpt_prmt = (
     "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "
 )
 
+# Prompt for product text review
+inpt_prmt_review = (
+    "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler. "
+    "Reduziere oder ersetze Wortwiederholungen, ohne den Inhalt zu verändern. "
+    "Füge am Ende einen kurzen Abschlusssatz hinzu. "
+    "Erfinde keine neuen Informationen und füge nichts hinzu, was nicht aus dem vorhandenen Text ableitbar ist. "
+    "Gib ausschließlich den überarbeiteten Text zurück, ohne zusätzliche Erklärungen oder Kommentare."
+)
+
 # columns, of the Excel file
 required_columns = [
     "Marke", "Gruppe", "Saison", "Modellnr", "Leistenbeschreibung", "Modellbeschreibung",
@@ -501,6 +510,61 @@ if df_org_data is not None:
 
         # transform list to dataframe for Excel export
         df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
+        
+
+        # review the gernerated product 
+        with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
+
+            # empty lists to store information of second loop
+            reviewed_texts = []
+            review_response_ids = []
+            review_created_utc = []
+            review_models = []
+            review_prompt_tokens = []
+            review_completion_tokens = []
+
+            # loop over every generated row
+            for idx in df_output_data.index:
+                original_text = df_output_data.loc[idx, "Produkttext"]
+
+                review_prompt = f"""
+                {inpt_prmt_review}
+
+                Text:
+                {original_text}
+                """
+
+                review_response = client.chat.completions.create(
+                    model=gpts_modl,
+                    messages=[
+                        {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig und in natürlichem Deutsch."},
+                        {"role": "user", "content": review_prompt}
+                    ],
+                    temperature=0.3
+                )
+
+                # Gore Tex in Ergebnis anpassen
+                reviewed_text = review_response.choices[0].message.content
+                reviewed_text = fnct_ptxt(reviewed_text)
+
+                # add results to lists
+                reviewed_texts.append(reviewed_text)
+                review_response_ids.append(review_response.id)
+                review_created_utc.append(datetime.fromtimestamp(review_response.created).strftime("%d.%m.%Y %H:%M:%S"))
+                review_models.append(review_response.model)
+                review_prompt_tokens.append(review_response.usage.prompt_tokens)
+                review_completion_tokens.append(review_response.usage.completion_tokens)
+
+
+        # Add Review columns to output dataframe
+        df_output_data["Review_Produkttext"] = reviewed_texts
+        df_output_data["Review_Response_ID"] = review_response_ids
+        df_output_data["Review_Created_UTC"] = review_created_utc
+        df_output_data["Review_Model"] = review_models
+        df_output_data["Review_Prompt_Tokens"] = review_prompt_tokens
+        df_output_data["Review_Completion_Tokens"] = review_completion_tokens
+
+
         # save current result in session state
         st.session_state.df_output_data = df_output_data
         st.session_state.generation_done = True
