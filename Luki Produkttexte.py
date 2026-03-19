@@ -37,6 +37,7 @@ inpt_prmt = (
     "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
     "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
 	"Der erste Satz muss Produktname und Produkttyp enthalten."
+    "Produktname immer mit Artikel (der/die/das)"
 	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
     "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
 	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
@@ -54,17 +55,12 @@ inpt_prmt = (
 inpt_prmt_review = (
     "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler."
     "Reduziere oder ersetze Wortwiederholungen, ohne den Inhalt zu verändern."
-    "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu, wie zB Ein idealer Begleiter für die Stadt."
-    "Erfinde keine neuen Informationen und füge nichts hinzu, was nicht aus dem vorhandenen Text ableitbar ist."
+    "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu, wie zB: Ein idealer Begleiter für die Stadt."
     "Gib ausschließlich den überarbeiteten Text zurück, ohne zusätzliche Erklärungen oder Kommentare."
     "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
     "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
     "dem legero Schuh für einen feinen und modernen Look. Die besonders weiche, flexible und superleichte PU-Sohle "
-    "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "   
-    "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
-    "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
-    "dem legero Schuh für einen feinen und modernen Look. Die besonders weiche, flexible und superleichte PU-Sohle "
-    "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "     
+    "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "      
 )
 
 # columns, of the Excel file
