@@ -545,7 +545,7 @@ if df_org_data is not None:
                         {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig und in natürlichem Deutsch."},
                         {"role": "user", "content": review_prompt}
                     ],
-                    temperature=0.5
+                    temperature=0.9
                 )
 
                 # Gore Tex in Ergebnis anpassen
