@@ -35,7 +35,6 @@ inpt_prmt = (
 	"Du bist ein erfahrener Werbetexter mit Spezialisierung auf Schuhe."
     "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
     "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
-	"Neuformulieren ist optional; vorhandene Formulierungen dürfen übernommen werden."    
 	"Der erste Satz muss Produktname und Produkttyp enthalten."
 	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
     "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
@@ -44,18 +43,18 @@ inpt_prmt = (
     "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
     "Halte die Textlänge zwischen 500-550 Zeichen, erwähne nie das Wort Leisten."
     "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben"
-    "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
-    "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
-    "dem legero Schuh für einen feinen und modernen Look. Die besonders weiche, flexible und superleichte PU-Sohle "
-    "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "
+  #  "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
+  #  "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
+  #  "dem legero Schuh für einen feinen und modernen Look. Die besonders weiche, flexible und superleichte PU-Sohle "
+  #  "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "
 )
 
 # Prompt for product text review
 inpt_prmt_review = (
-    "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler. "
-    "Reduziere oder ersetze Wortwiederholungen, ohne den Inhalt zu verändern. "
-    "Füge am Ende einen kurzen Abschlusssatz hinzu. "
-    "Erfinde keine neuen Informationen und füge nichts hinzu, was nicht aus dem vorhandenen Text ableitbar ist. "
+    "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler."
+    "Reduziere oder ersetze Wortwiederholungen, ohne den Inhalt zu verändern."
+    "Füge am Ende einen kurzen Abschlusssatz hinzu."
+    "Erfinde keine neuen Informationen und füge nichts hinzu, was nicht aus dem vorhandenen Text ableitbar ist."
     "Gib ausschließlich den überarbeiteten Text zurück, ohne zusätzliche Erklärungen oder Kommentare."
 )
 
@@ -482,7 +481,7 @@ if df_org_data is not None:
                         {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
                         {"role": "user", "content": final_prompt}
                     ],
-                    temperature=0.5
+                    temperature=0.6
 
                     # tokens not needed for 5.2 model
                     #max_tokens=1200
@@ -540,7 +539,7 @@ if df_org_data is not None:
                         {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig und in natürlichem Deutsch."},
                         {"role": "user", "content": review_prompt}
                     ],
-                    temperature=0.3
+                    temperature=0.5
                 )
 
                 # Gore Tex in Ergebnis anpassen
