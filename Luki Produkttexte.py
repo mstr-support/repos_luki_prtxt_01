@@ -38,6 +38,7 @@ inpt_prmt = (
     "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
 	"Der erste Satz muss Produktname und Produkttyp enthalten."
     "Produktname + Kategorie immer mit Artikel (zB Der Sneaker XXX, die Hausschuhe YYY)"
+    "Füge gelegentlich auch das Geschlecht zur Kategorie, zB Herrensneaker, Damenschuh"
 	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
     "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
 	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
