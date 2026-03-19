@@ -37,7 +37,7 @@ inpt_prmt = (
     "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
     "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
 	"Der erste Satz muss Produktname und Produkttyp enthalten."
-    "Produktname immer mit Artikel (der/die/das)"
+    "Produktname + Kategorie immer mit Artikel (zB Der Sneaker XXX, die Hausschuhe YYY)"
 	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
     "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
 	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
