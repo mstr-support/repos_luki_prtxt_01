@@ -52,7 +52,7 @@ inpt_prmt = (
 inpt_prmt_review = (
     "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler."
     "Ersetze Wortwiederholungen, ohne den Inhalt zu verändern."
-    "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu."
+    "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu, siehe Beispieltext."
     "Gib ausschließlich den überarbeiteten Text zurück, ohne zusätzliche Erklärungen oder Kommentare."
     "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
     "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
@@ -541,7 +541,7 @@ if df_org_data is not None:
                         {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig und in natürlichem Deutsch."},
                         {"role": "user", "content": review_prompt}
                     ],
-                    temperature=0.6
+                    temperature=0.7
                 )
 
                 # Gore Tex in Ergebnis anpassen
