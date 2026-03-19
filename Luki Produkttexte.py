@@ -52,8 +52,7 @@ inpt_prmt = (
 inpt_prmt_review = (
     "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler."
     "Ersetze Wortwiederholungen, ohne den Inhalt zu verändern."
-    "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu, wie zB: Ein idealer Begleiter für die Stadt"
-    "oder Jetzt kann der Sommer kommen."
+    "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu."
     "Gib ausschließlich den überarbeiteten Text zurück, ohne zusätzliche Erklärungen oder Kommentare."
     "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
     "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
