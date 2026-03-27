@@ -623,7 +623,7 @@ with tab1:
 
 
 
-with st.tab1:
+with tab2:
 
     with st.expander("Information"):
                 
