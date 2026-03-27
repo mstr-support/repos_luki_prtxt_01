@@ -378,8 +378,13 @@ if "tab2_imported_file_name" not in st.session_state:
 #    st.image("images/logo_large_leg.png", width=200)
 
 
+
+
+
+####
+# 
+# 1st tab for product text generation
 #
-# TAB1: Product text generation
 #
 
 with tab1:
@@ -651,6 +656,13 @@ with tab1:
 
 
 
+####
+# 
+# 2nd Tab for SEO Optimization of Product text
+#
+#
+
+
 with tab2:
 
     with st.expander("Information"):
@@ -703,23 +715,23 @@ with tab2:
         st.info("Bitte eine Datei hochladen.")
 
 
-    if tab1_df_org_data is not None:
+    if tab2_df_org_data is not None:
         
 
         tab2_col_error = False
         for col in tab2_required_columns:
-            if col not in tab1_df_org_data.columns:
+            if col not in tab2_df_org_data.columns:
                 st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
                 tab2_col_error = True
 
-        if len(tab1_df_org_data) == 0:
+        if len(tab2_df_org_data) == 0:
             st.error("Die hochgeladene Datei enthält keine Datensätze.")
             tab2_col_error = True
 
         if tab2_col_error:
             st.stop()
 
-        st.dataframe(tab1_df_org_data)
+        st.dataframe(tab2_df_org_data)
 
         if st.session_state.seo_done:
             df_seo_output_data = st.session_state.df_seo_output_data
@@ -730,8 +742,8 @@ with tab2:
             tab2_output_rows = []
 
             with st.spinner("SEO-Optimierung läuft...", show_time=True):
-                for idx in tab1_df_org_data.index:
-                    original_text = str(tab1_df_org_data.loc[idx, "Produkttext"]).strip()
+                for idx in tab2_df_org_data.index:
+                    original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
 
                     seo_prompt = inpt_prmt_seo.replace("{{PRODUCT_TEXT}}", original_text)
 
@@ -748,8 +760,8 @@ with tab2:
                     seo_text = fnct_ptxt(seo_text)
 
                     # add Tokens to already used tokens 
-                    original_prompt_tokens = tab1_df_org_data.loc[idx, "Prompt_Tokens"]
-                    original_completion_tokens = tab1_df_org_data.loc[idx, "Completion_Tokens"]
+                    original_prompt_tokens = tab2_df_org_data.loc[idx, "Prompt_Tokens"]
+                    original_completion_tokens = tab2_df_org_data.loc[idx, "Completion_Tokens"]
 
                     if pd.isna(original_prompt_tokens):
                         original_prompt_tokens = 0
@@ -757,7 +769,7 @@ with tab2:
                         original_completion_tokens = 0
 
                     tab2_output_rows.append({
-                        "Modell": tab1_df_org_data.loc[idx, "Modell"],
+                        "Modell": tab2_df_org_data.loc[idx, "Modell"],
                         "Produkttext": seo_text,
                         "Response_ID": seo_response.id,
                         "Created_UTC": datetime.fromtimestamp(seo_response.created).strftime("%d.%m.%Y %H:%M:%S"),
