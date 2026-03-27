@@ -354,7 +354,7 @@ if "tab2_imported_file_name" not in st.session_state:
 # TAB1: Product text generation
 #
 
-with st.tab1:
+with tab1:
 
     with st.expander("Information"):
                 
