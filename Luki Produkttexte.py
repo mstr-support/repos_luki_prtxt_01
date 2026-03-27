@@ -567,21 +567,12 @@ if df_org_data is not None:
         df_output_data["Created_UTC"] = review_created_utc
         df_output_data["Model"] = review_models
         
-        df_output_data["Sum_prompt_tokens"] = (
+        df_output_data["Prompt_Tokens"] = (
             df_output_data["Prompt_Tokens"] + pd.Series(review_prompt_tokens)
         )
-        df_output_data["sum_Completion_Tokens"] = (
+        df_output_data["Completion_Tokens"] = (
             df_output_data["Completion_Tokens"] + pd.Series(review_completion_tokens)
         )
-
-        # Add Review columns to output dataframe
-        df_output_data["Review_Produkttext"] = reviewed_texts
-        df_output_data["Review_Response_ID"] = review_response_ids
-        df_output_data["Review_Created_UTC"] = review_created_utc
-        df_output_data["Review_Model"] = review_models
-        df_output_data["Review_Prompt_Tokens"] = review_prompt_tokens
-        df_output_data["Review_Completion_Tokens"] = review_completion_tokens
-
 
         # save current result in session state
         st.session_state.df_output_data = df_output_data
