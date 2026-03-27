@@ -555,6 +555,24 @@ if df_org_data is not None:
                 review_prompt_tokens.append(review_response.usage.prompt_tokens)
                 review_completion_tokens.append(review_response.usage.completion_tokens)
 
+                
+
+
+        # LEG-256 final consolidation if review round
+        # only result text of review is taken
+        # used tokens are summed up
+
+        df_output_data["Produkttext"] = reviewed_texts
+        df_output_data["Response_ID"] = review_response_ids
+        df_output_data["Created_UTC"] = review_created_utc
+        df_output_data["Model"] = review_models
+        
+        df_output_data["Sum_prompt_tokens"] = (
+            df_output_data["Prompt_Tokens"] + pd.Series(review_prompt_tokens)
+        )
+        df_output_data["sum_Completion_Tokens"] = (
+            df_output_data["Completion_Tokens"] + pd.Series(review_completion_tokens)
+        )
 
         # Add Review columns to output dataframe
         df_output_data["Review_Produkttext"] = reviewed_texts
