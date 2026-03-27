@@ -706,7 +706,7 @@ with tab2:
                 tab2_df_org_data = pd.read_excel(tab2_uploaded_file, sheet_name=0, engine="openpyxl")
                 st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
 
-            st.session_state.tab1_imported_file_name = tab2_uploaded_file.name       
+            st.session_state.tab2_imported_file_name = tab2_uploaded_file.name       
 
         except Exception as e:
             st.error(f"Fehler beim Einlesen: {e}")
@@ -733,8 +733,8 @@ with tab2:
 
         st.dataframe(tab2_df_org_data)
 
-        if st.session_state.seo_done:
-            df_seo_output_data = st.session_state.df_seo_output_data
+        if st.session_state.tab2_generation_done:
+            tab2_df_output_data = st.session_state.tab2_df_output_data
 
         if st.button("SEO-Texte generieren", key="seo_generate_button"):
 
