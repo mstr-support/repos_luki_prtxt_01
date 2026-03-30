@@ -48,7 +48,7 @@ inpt_prmt = (
 # Prompt for product text review
 inpt_prmt_review = (
     "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler."
-    "Verkürze den Text auf circa 500 Zeichen"
+    "Verkürze den Text auf circa 450 Zeichen"
     "Ersetze Wortwiederholungen, ohne den Inhalt zu verändern."
     "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu, siehe Beispieltext."
     "Gib ausschließlich den überarbeiteten Text zurück, ohne zusätzliche Erklärungen oder Kommentare."
