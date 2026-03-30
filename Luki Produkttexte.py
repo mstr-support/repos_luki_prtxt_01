@@ -58,8 +58,31 @@ inpt_prmt_review = (
     "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "      
 )
 
+# Prompt for SEO optimization
+inpt_prmt_seo = (
+    "Du bist ein SEO-Texter.\n\n"
+    "Aufgabe:\n"
+    "SEO-optimiere den folgenden Produkttext.\n\n"
+    "Anforderungen:\n"
+    "- Verwende relevante Keywords natürlich im Text (z. B. Sneaker, Herren, bequem, Leder, wasserdicht, etc.)\n"
+    "- Vermeide Keyword-Stuffing\n"
+    "- Schreibe klar, strukturiert und verkaufsorientiert\n"
+    "- Länge des Inputes ungefähr beibehalten\n"
+    "- Ein zusammenhängender Absatz (kein Bullet-Format)\n\n"
+    "Stil:\n"
+    "- Sachlich, modern, hochwertig\n"
+    "- Keine Wiederholungen\n"
+    "- Aktive Sprache\n\n"
+    "Output:\n"
+    "Nur den optimierten Text zurückgeben.\n\n"
+    "Input:\n"
+    "{{PRODUCT_TEXT}}"
+)
+
+#
 # columns, of the Excel file
-required_columns = [
+#
+tab1_required_columns = [
     "Marke", "Gruppe", "Saison", "Modellnr", "Leistenbeschreibung", "Modellbeschreibung",
     "Produkttext", 
     "Geschlecht", "Produkttyp OS", "Verschluss",
@@ -68,6 +91,11 @@ required_columns = [
     "Wechselfußbett", "Decksohle", "Futtermaterial", "Futter Detail", "Zertifikate",
     "Leuchtendes Motiv", "Non-marking Sohle", "Wasserbeständig", "Made in Europe"
 ]
+
+tab2_required_columns = [
+    "Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"
+]
+
 
 
 # fixed replacement for speficif values
@@ -314,20 +342,33 @@ def fnct_ptxt(text: str) -> str:
 #
 
 
+st.title("[LUKI] Produkttexte")
+
+tab1, tab2 = st.tabs(["Produkttexte", "SEO-Optimierung"])
 
 
 #
 # content
 #
 
+# session variables are needed for both tabs
 
-# check session variables, whether a generation was already done
-if "generation_done" not in st.session_state:
-    st.session_state.generation_done = False
-if "df_output_data" not in st.session_state:
-    st.session_state.df_output_data = None
-if "imported_file_name" not in st.session_state:
-    st.session_state.imported_file_name = None
+# check session variables for product , whether a generation was already done
+if "tab1_generation_done" not in st.session_state:
+    st.session_state.tab1_generation_done = False
+if "tab1_df_output_data" not in st.session_state:
+    st.session_state.tab1_df_output_data = None
+if "tab1_imported_file_name" not in st.session_state:
+    st.session_state.tab1_imported_file_name = None
+
+
+# check session variables for SOE , whether a generation was already done
+if "tab2_generation_done" not in st.session_state:
+    st.session_state.tab2_generation_done = False
+if "tab2_df_output_data" not in st.session_state:
+    st.session_state.tab2_df_output_data = None
+if "tab2_imported_file_name" not in st.session_state:
+    st.session_state.tab2_imported_file_name = None
 
 
 # logo on page right
@@ -336,260 +377,438 @@ if "imported_file_name" not in st.session_state:
 #    st.image("images/logo_large_leg.png", width=200)
 
 
-st.title("[LUKI] Produkttexte")
-
-with st.expander("Information"):
-            
-
-            st.markdown("""
-                  <p>
-                  Willkommen in der App zur automatischen Erstellung von Produkttexten. Diese wurde im Rahmen des LUKI-Projektes erstellt und generiert automatisch Texte für Modelle. 
-                  Unter "Upload File" kannst du die zu verarbeitenden Modelle hochladen, das Excel muss dem Format des IPIM-Exportes "ipim_datenfeed" entsprechen. Die Verarbeitung in der App dauert einige Sekunden bis Minuten.
-                  </p> <p>                 
-                  Bitte lade während der Testphase nicht mehr als 50 Modelle auf einmal hoch. 
-                  </p> <p>
-                  Viel Spaß!</p> <p> </p>
-                  Robert
-                  <p> </p>
-                  """, unsafe_allow_html=True)
-            
-
-# upoad butte for Excel file
-uploaded_file = st.file_uploader("Excel Datei mit Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
-
-# empty data frame for data
-df_org_data = None
-df_output_data = None
-
-if uploaded_file:
-    st.markdown(f"**Dateiname:** `{uploaded_file.name}`")
-
-    # check if the file is still the same like in the session state
-    # -> file is always transformed to data frame of the code
-    if st.session_state.imported_file_name != uploaded_file.name:
-        # file name changed -> new generation
-        st.session_state.generation_done = False
-
-    try:
-        # CSV einlesen
-        if uploaded_file.name.lower().endswith(".csv"):
-            df_org_data = pd.read_csv(uploaded_file)
-            st.success("CSV erfolgreich geladen.")
-
-        # Read always first sheet of Excelfile
-        else:
-            df_org_data = pd.read_excel(uploaded_file, sheet_name=0, engine="openpyxl")
-            st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
-
-        st.session_state.imported_file_name = uploaded_file.name
-
-        # records with already existing Produkttext are filtered
-        df_org_data = df_org_data[df_org_data["Produkttext"].isna()]
-
-        # reset index after drop of rows
-        df_org_data = df_org_data.reset_index(drop=True)
-
-    except Exception as e:
-        st.error(f"Fehler beim Einlesen: {e}")
-
-else:
-    st.info("Bitte eine Datei hochladen.")
 
 
+
+####
+# 
+# 1st tab for product text generation
 #
-# site will just continue if data was read from Excel
 #
 
-if df_org_data is not None:
+with tab1:
 
-    # check for errors
-    col_error = False
+    with st.expander("Information"):
+                
 
-    for col in required_columns:
-        if col not in df_org_data.columns:
-            st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
+                st.markdown("""
+                    <p>
+                    Willkommen in der App zur automatischen Erstellung von Produkttexten. Diese wurde im Rahmen des LUKI-Projektes erstellt und generiert automatisch Texte für Modelle. 
+                    Unter "Upload File" kannst du die zu verarbeitenden Modelle hochladen, das Excel muss dem Format des IPIM-Exportes "ipim_datenfeed" entsprechen. Die Verarbeitung in der App dauert einige Sekunden bis Minuten.
+                    </p> <p>                 
+                    Bitte lade während der Testphase nicht mehr als 50 Modelle auf einmal hoch. 
+                    </p> <p>
+                    Viel Spaß!</p> <p> </p>
+                    Robert
+                    <p> </p>
+                    """, unsafe_allow_html=True)
+                
+
+    # upoad butte for Excel file
+    tab1_uploaded_file = st.file_uploader("Excel Datei mit Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
+
+    # empty data frame for data
+    tab1_df_org_data = None
+    tab1_df_output_data = None
+
+    if tab1_uploaded_file:
+        st.markdown(f"**Dateiname:** `{tab1_uploaded_file.name}`")
+
+        # check if the file is still the same like in the session state
+        # -> file is always transformed to data frame of the code
+        if st.session_state.tab1_imported_file_name != tab1_uploaded_file.name:
+            # file name changed -> new generation
+            st.session_state.tab1_generation_done = False
+
+        try:
+            # CSV einlesen
+            if tab1_uploaded_file.name.lower().endswith(".csv"):
+                tab1_df_org_data = pd.read_csv(tab1_uploaded_file)
+                st.success("CSV erfolgreich geladen.")
+
+            # Read always first sheet of Excelfile
+            else:
+                tab1_df_org_data = pd.read_excel(tab1_uploaded_file, sheet_name=0, engine="openpyxl")
+                st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
+
+            st.session_state.tab1_imported_file_name = tab1_uploaded_file.name
+
+            # records with already existing Produkttext are filtered
+            tab1_df_org_data = tab1_df_org_data[tab1_df_org_data["Produkttext"].isna()]
+
+            # reset index after drop of rows
+            tab1_df_org_data = tab1_df_org_data.reset_index(drop=True)
+
+        except Exception as e:
+            st.error(f"Fehler beim Einlesen: {e}")
+
+    else:
+        st.info("Bitte eine Datei hochladen.")
+
+
+    #
+    # site will just continue if data was read from Excel
+    #
+
+    if tab1_df_org_data is not None:
+
+        # check for errors
+        col_error = False
+
+        for col in tab1_required_columns:
+            if col not in tab1_df_org_data.columns:
+                st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
+                col_error = True
+
+
+        # check if still data in dataframe after filterung for empty Produkttexte
+        if len(tab1_df_org_data) == 0:
+            st.error("Alle Produkttexte in hochgeladener Datei bereits befüllt.")
             col_error = True
 
-
-    # check if still data in dataframe after filterung for empty Produkttexte
-    if len(df_org_data) == 0:
-        st.error("Alle Produkttexte in hochgeladener Datei bereits befüllt.")
-        col_error = True
-
-    # stop generation if a error in the data was recognized
-    if col_error == True:
-        st.stop()
+        # stop generation if a error in the data was recognized
+        if col_error == True:
+            st.stop()
 
 
 
-    st.dataframe(df_org_data)
+        st.dataframe(tab1_df_org_data)
 
-    # check if generation was already done before and
-    # take data from last execution
-    if st.session_state.generation_done == True:
-        df_output_data = st.session_state.df_output_data
-    
-    
-
-
-    # button to start generation of produkttexte
-    if st.button("Produkttexte generieren"):
-
-        # initialisierung
-        client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
-        rows_indx = 0
-        list_output_data = []
-
+        # check if generation was already done before and
+        # take data from last execution
+        if st.session_state.tab1_generation_done == True:
+            tab1_df_output_data = st.session_state.tab1_df_output_data
         
         
-        # loop
-        with st.spinner("Produkttexte werden generiert...", show_time=True):
 
-            for rows_indx in df_org_data.index:
-                        
-                #st.write(rows_indx)
 
-                inpt_vatr = ", ".join(
-                    f"{col}: {val}"
-                    for col, val in {
-                        "Produktname": df_org_data.loc[rows_indx, "Gruppe"],
-                        "Leistenbeschreibung": df_org_data.loc[rows_indx, "Leistenbeschreibung"],                             
-                        "Modellbeschreibung": df_org_data.loc[rows_indx, "Modellbeschreibung"],     
-                        "Produkttyp": fnct_ptyp(df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
-                        "Geschlecht": fnct_gesl(df_org_data.loc[rows_indx, "Marke"], df_org_data.loc[rows_indx, "Geschlecht"]),
-                        #"Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
-                        "Laufsohleneigenschaften": fnct_lfso(df_org_data.loc[rows_indx, "Saison"], df_org_data.loc[rows_indx, "Laufsohle"], df_org_data.loc[rows_indx, "Marke"]),
-                        #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
-                        "Nachhaltigkeit": df_org_data.loc[rows_indx, "Nachhaltigkeit"],
-                        "Membrane": df_org_data.loc[rows_indx, "Membrane"],
-                        "Futtermaterial": df_org_data.loc[rows_indx, "Futtermaterial"],                        
-                        "Schuhweite": df_org_data.loc[rows_indx, "Schuhweite"],   
-                        "Einlegesohle": fnct_wfub(df_org_data.loc[rows_indx, "Wechselfußbett"])                                              
-                    }.items()
-                    if pd.notna(val) and str(val).strip() != ""
-                )
+        # button to start generation of produkttexte
+        if st.button("Produkttexte generieren"):
 
-                final_prompt = f"""
-                {inpt_prmt}                
-                Attribute:
-                {inpt_vatr}
-                """
+            # initialisierung
+            client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
+            rows_indx = 0
+            list_output_data = []
 
-                response = client.chat.completions.create(
-                    model=gpts_modl,
-                    messages=[
-                        {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
-                        {"role": "user", "content": final_prompt}
-                    ],
-                    temperature=0.5
+            
+            
+            # loop
+            with st.spinner("Produkttexte werden generiert...", show_time=True):
 
-                    # tokens not needed for 5.2 model
-                    #max_tokens=1200
-                )
+                for rows_indx in tab1_df_org_data.index:
+                            
+                    #st.write(rows_indx)
 
-                #print(f"\n--- Zeile {rows_indx + 1} ---")
-                #print(response.choices[0].message.content)
-                text_output = response.choices[0].message.content  
+                    inpt_vatr = ", ".join(
+                        f"{col}: {val}"
+                        for col, val in {
+                            "Produktname": tab1_df_org_data.loc[rows_indx, "Gruppe"],
+                            "Leistenbeschreibung": tab1_df_org_data.loc[rows_indx, "Leistenbeschreibung"],                             
+                            "Modellbeschreibung": tab1_df_org_data.loc[rows_indx, "Modellbeschreibung"],     
+                            "Produkttyp": fnct_ptyp(tab1_df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
+                            "Geschlecht": fnct_gesl(tab1_df_org_data.loc[rows_indx, "Marke"], tab1_df_org_data.loc[rows_indx, "Geschlecht"]),
+                            #"Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
+                            "Laufsohleneigenschaften": fnct_lfso(tab1_df_org_data.loc[rows_indx, "Saison"], tab1_df_org_data.loc[rows_indx, "Laufsohle"], tab1_df_org_data.loc[rows_indx, "Marke"]),
+                            #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
+                            "Nachhaltigkeit": tab1_df_org_data.loc[rows_indx, "Nachhaltigkeit"],
+                            "Membrane": tab1_df_org_data.loc[rows_indx, "Membrane"],
+                            "Futtermaterial": tab1_df_org_data.loc[rows_indx, "Futtermaterial"],                        
+                            "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
+                            "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])                                              
+                        }.items()
+                        if pd.notna(val) and str(val).strip() != ""
+                    )
 
-                # Gore Tex in Ergebnis anpassen
-                text_output = fnct_ptxt(text_output)
+                    final_prompt = f"""
+                    {inpt_prmt}                
+                    Attribute:
+                    {inpt_vatr}
+                    """
 
-                modl = df_org_data["Modellnr"].iloc[rows_indx]
-                list_output_data.append({
-                    "Modell": modl,
-                    "Produkttext": text_output,
-                    "Response_ID": response.id,
-                    "Created_UTC": datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"),
-                    "Model": response.model,
-                    "Prompt_Tokens": response.usage.prompt_tokens,
-                    "Completion_Tokens": response.usage.completion_tokens
-                })
-                print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
-                rows_indx += 1
+                    response = client.chat.completions.create(
+                        model=gpts_modl,
+                        messages=[
+                            {"role": "system", "content": "Du bist ein erfahrener Werbetexter für Schuhe."},
+                            {"role": "user", "content": final_prompt}
+                        ],
+                        temperature=0.5
 
-        # transform list to dataframe for Excel export
-        df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
+                        # tokens not needed for 5.2 model
+                        #max_tokens=1200
+                    )
+
+                    #print(f"\n--- Zeile {rows_indx + 1} ---")
+                    #print(response.choices[0].message.content)
+                    text_output = response.choices[0].message.content  
+
+                    # Gore Tex in Ergebnis anpassen
+                    text_output = fnct_ptxt(text_output)
+
+                    modl = tab1_df_org_data["Modellnr"].iloc[rows_indx]
+                    list_output_data.append({
+                        "Modell": modl,
+                        "Produkttext": text_output,
+                        "Response_ID": response.id,
+                        "Created_UTC": datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"),
+                        "Model": response.model,
+                        "Prompt_Tokens": response.usage.prompt_tokens,
+                        "Completion_Tokens": response.usage.completion_tokens
+                    })
+                    print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
+                    rows_indx += 1
+
+            # transform list to dataframe for Excel export
+            tab1_df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
+            
+
+            # review the gernerated product 
+            with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
+
+                # empty lists to store information of second loop
+                reviewed_texts = []
+                review_response_ids = []
+                review_created_utc = []
+                review_models = []
+                review_prompt_tokens = []
+                review_completion_tokens = []
+
+                # loop over every generated row
+                for idx in tab1_df_output_data.index:
+                    original_text = tab1_df_output_data.loc[idx, "Produkttext"]
+
+                    review_prompt = f"""
+                    {inpt_prmt_review}
+
+                    Text:
+                    {original_text}
+                    """
+
+                    review_response = client.chat.completions.create(
+                        model=gpts_modl,
+                        messages=[
+                            {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig und in natürlichem Deutsch."},
+                            {"role": "user", "content": review_prompt}
+                        ],
+                        temperature=0.7
+                    )
+
+                    # Gore Tex in Ergebnis anpassen
+                    reviewed_text = review_response.choices[0].message.content
+                    reviewed_text = fnct_ptxt(reviewed_text)
+
+                    # add results to lists
+                    reviewed_texts.append(reviewed_text)
+                    review_response_ids.append(review_response.id)
+                    review_created_utc.append(datetime.fromtimestamp(review_response.created).strftime("%d.%m.%Y %H:%M:%S"))
+                    review_models.append(review_response.model)
+                    review_prompt_tokens.append(review_response.usage.prompt_tokens)
+                    review_completion_tokens.append(review_response.usage.completion_tokens)
+
+                    
+
+
+            # LEG-256 final consolidation if review round
+            # only result text of review is taken
+            # used tokens are summed up
+
+            tab1_df_output_data["Produkttext"] = reviewed_texts
+            tab1_df_output_data["Response_ID"] = review_response_ids
+            tab1_df_output_data["Created_UTC"] = review_created_utc
+            tab1_df_output_data["Model"] = review_models
+            
+            tab1_df_output_data["Prompt_Tokens"] = (
+                tab1_df_output_data["Prompt_Tokens"] + pd.Series(review_prompt_tokens)
+            )
+            tab1_df_output_data["Completion_Tokens"] = (
+                tab1_df_output_data["Completion_Tokens"] + pd.Series(review_completion_tokens)
+            )
+
+            # save current result in session state
+            st.session_state.tab1_df_output_data = tab1_df_output_data
+            st.session_state.tab1_generation_done = True
+
+        
+        if tab1_df_output_data is not None:
+
+            # write output
+            st.success("Produkttexte erfolgreich generiert.")
+            st.dataframe(tab1_df_output_data.drop('Produkttext',axis=1))
+
+            # prepare Excel Download
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+                tab1_df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
+            buffer.seek(0)
+
+            # create timestamp for filename
+            timestamp = datetime.now().strftime("%Y%m%d")
+            filename = f"Produkttexte_{timestamp}.xlsx"
+
+            # Download button
+            st.download_button(
+                label="Als Excel herunterladen",
+                data=buffer,
+                file_name=filename,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+
+
+
+
+####
+# 
+# 2nd Tab for SEO Optimization of Product text
+#
+#
+
+
+with tab2:
+
+    with st.expander("Information"):
+                
+
+                st.markdown("""
+                    <p>
+                    In diesem Reiter können bereits erstellte und manuell geprüfte Produkttexte SEO-optimiert werden.
+                    Bitte lade die Output-Datei aus der Produkttexterstellung hoch.
+                    </p> <p>                                     
+                    Viel Spaß!</p> <p> </p>
+                    Robert
+                    <p> </p>
+                    """, unsafe_allow_html=True)
+                
+
+    # upoad butte for Excel file
+    tab2_uploaded_file = st.file_uploader("Excel Datei mit generierten Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
+
+    # empty data frame for data
+    tab2_df_org_data = None
+    tab2_df_output_data = None
+
+    if tab2_uploaded_file:
+        st.markdown(f"**Dateiname:** `{tab2_uploaded_file.name}`")
+
+        # check if the file is still the same like in the session state
+        # -> file is always transformed to data frame of the code
+        if st.session_state.tab1_imported_file_name != tab2_uploaded_file.name:
+            # file name changed -> new generation
+            st.session_state.tab1_generation_done = False
+
+        try:
+            # CSV einlesen
+            if tab2_uploaded_file.name.lower().endswith(".csv"):
+                tab2_df_org_data = pd.read_csv(tab2_uploaded_file)
+                st.success("CSV erfolgreich geladen.")
+
+            # Read always first sheet of Excelfile
+            else:
+                tab2_df_org_data = pd.read_excel(tab2_uploaded_file, sheet_name=0, engine="openpyxl")
+                st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
+
+            st.session_state.tab2_imported_file_name = tab2_uploaded_file.name       
+
+        except Exception as e:
+            st.error(f"Fehler beim Einlesen: {e}")
+
+    else:
+        st.info("Bitte eine Datei hochladen.")
+
+
+    if tab2_df_org_data is not None:
         
 
-        # review the gernerated product 
-        with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
+        tab2_col_error = False
+        for col in tab2_required_columns:
+            if col not in tab2_df_org_data.columns:
+                st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
+                tab2_col_error = True
 
-            # empty lists to store information of second loop
-            reviewed_texts = []
-            review_response_ids = []
-            review_created_utc = []
-            review_models = []
-            review_prompt_tokens = []
-            review_completion_tokens = []
+        if len(tab2_df_org_data) == 0:
+            st.error("Die hochgeladene Datei enthält keine Datensätze.")
+            tab2_col_error = True
 
-            # loop over every generated row
-            for idx in df_output_data.index:
-                original_text = df_output_data.loc[idx, "Produkttext"]
+        if tab2_col_error:
+            st.stop()
 
-                review_prompt = f"""
-                {inpt_prmt_review}
+        st.dataframe(tab2_df_org_data)
 
-                Text:
-                {original_text}
-                """
+        if st.session_state.tab2_generation_done:
+            tab2_df_output_data = st.session_state.tab2_df_output_data
 
-                review_response = client.chat.completions.create(
-                    model=gpts_modl,
-                    messages=[
-                        {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig und in natürlichem Deutsch."},
-                        {"role": "user", "content": review_prompt}
-                    ],
-                    temperature=0.7
-                )
+        if st.button("SEO-Texte generieren", key="seo_generate_button"):
 
-                # Gore Tex in Ergebnis anpassen
-                reviewed_text = review_response.choices[0].message.content
-                reviewed_text = fnct_ptxt(reviewed_text)
+            client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
+            tab2_output_rows = []
 
-                # add results to lists
-                reviewed_texts.append(reviewed_text)
-                review_response_ids.append(review_response.id)
-                review_created_utc.append(datetime.fromtimestamp(review_response.created).strftime("%d.%m.%Y %H:%M:%S"))
-                review_models.append(review_response.model)
-                review_prompt_tokens.append(review_response.usage.prompt_tokens)
-                review_completion_tokens.append(review_response.usage.completion_tokens)
+            with st.spinner("SEO-Optimierung läuft...", show_time=True):
+                for idx in tab2_df_org_data.index:
+                    original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
 
+                    seo_prompt = inpt_prmt_seo.replace("{{PRODUCT_TEXT}}", original_text)
 
-        # Add Review columns to output dataframe
-        df_output_data["Review_Produkttext"] = reviewed_texts
-        df_output_data["Review_Response_ID"] = review_response_ids
-        df_output_data["Review_Created_UTC"] = review_created_utc
-        df_output_data["Review_Model"] = review_models
-        df_output_data["Review_Prompt_Tokens"] = review_prompt_tokens
-        df_output_data["Review_Completion_Tokens"] = review_completion_tokens
+                    seo_response = client.chat.completions.create(
+                        model=gpts_modl,
+                        messages=[
+                            {"role": "system", "content": "Du bist ein erfahrener SEO-Texter für Produkttexte."},
+                            {"role": "user", "content": seo_prompt}
+                        ],
+                        temperature=0.5
+                    )
 
+                    seo_text = seo_response.choices[0].message.content
+                    seo_text = fnct_ptxt(seo_text)
 
-        # save current result in session state
-        st.session_state.df_output_data = df_output_data
-        st.session_state.generation_done = True
+                    # add Tokens to already used tokens 
+                    original_prompt_tokens = tab2_df_org_data.loc[idx, "Prompt_Tokens"]
+                    original_completion_tokens = tab2_df_org_data.loc[idx, "Completion_Tokens"]
 
-    
-    if df_output_data is not None:
+                    if pd.isna(original_prompt_tokens):
+                        original_prompt_tokens = 0
+                    if pd.isna(original_completion_tokens):
+                        original_completion_tokens = 0
 
-        # write output
-        st.success("Produkttexte erfolgreich generiert.")
-        st.dataframe(df_output_data.drop('Produkttext',axis=1))
+                    tab2_output_rows.append({
+                        "Modell": tab2_df_org_data.loc[idx, "Modell"],
+                        "Produkttext": seo_text,
+                        "Response_ID": seo_response.id,
+                        "Created_UTC": datetime.fromtimestamp(seo_response.created).strftime("%d.%m.%Y %H:%M:%S"),
+                        "Model": seo_response.model,
+                        "Prompt_Tokens": int(original_prompt_tokens) + seo_response.usage.prompt_tokens,
+                        "Completion_Tokens": int(original_completion_tokens) + seo_response.usage.completion_tokens
+                    })
 
-        # prepare Excel Download
-        buffer = BytesIO()
-        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-            df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
-        buffer.seek(0)
+            tab2_df_output_data = pd.DataFrame(
+                tab2_output_rows,
+                columns=[
+                    "Modell",
+                    "Produkttext",
+                    "Response_ID",
+                    "Created_UTC",
+                    "Model",
+                    "Prompt_Tokens",
+                    "Completion_Tokens"
+                ]
+            )
 
-        # create timestamp for filename
-        timestamp = datetime.now().strftime("%Y%m%d")
-        filename = f"Produkttexte_{timestamp}.xlsx"
+            st.session_state.tab2_df_output_data = tab2_df_output_data
+            st.session_state.seo_done = True
 
-        # Download button
-        st.download_button(
-            label="Als Excel herunterladen",
-            data=buffer,
-            file_name=filename,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        if tab2_df_output_data is not None:
+            st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
+            st.dataframe(tab2_df_output_data)
 
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+                tab2_df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
+            buffer.seek(0)
+
+            timestamp = datetime.now().strftime("%Y%m%d")
+            filename = f"Produkttexte_SEO_{timestamp}.xlsx"
+
+            st.download_button(
+                label="Als Excel herunterladen",
+                data=buffer,
+                file_name=filename,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="seo_download_button"
+            )
