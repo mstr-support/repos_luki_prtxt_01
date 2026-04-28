@@ -828,4 +828,54 @@ with tab3:
     with st.expander("Information"):
         st.markdown("""
             <p>Hier kannst du die Selling Points Konfiguration direkt bearbeiten und speichern.</p>
+            </p> <p>                                     
+            Viel Spaß!</p> <p> </p>
+            Robert
+            <p> </p>
         """, unsafe_allow_html=True)
+
+    # load excel if not yet done
+    if "tab3_df" not in st.session_state:
+        try:
+            tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            st.session_state.tab3_df = tab3_df
+        except Exception as e:
+            st.error(f"Fehler beim Laden der Datei: {e}")
+            st.stop()
+
+    # Button to manually reload the file
+    if st.button("🔄 Neu laden", key="tab3_reload"):
+        try:
+            st.session_state.tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            st.success("Datei neu geladen.")
+        except Exception as e:
+            st.error(f"Fehler beim Laden: {e}")
+
+    # Data Editor - has seperate data frame, which has to be saved
+    tab3_edited_df = st.data_editor(
+        st.session_state.tab3_df,
+        use_container_width=True,
+        num_rows="dynamic",
+        key="tab3_editor"
+    )
+
+
+    # Save button
+    if st.button("💾 Speichern", key="tab3_save"):
+        try:
+            # tranform data frame to Excel byte stream
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+                tab3_edited_df.to_excel(writer, index=False, sheet_name="Seite1")
+            buffer.seek(0)
+
+            # write byte stream to blob storage            
+            blob_client = BlobClient.from_blob_url(st.secrets["AZURE_BLOB_URL"])
+            blob_client.upload_blob(buffer, overwrite=True)
+
+            # update session state
+            st.session_state.tab3_df = tab3_edited_df
+            st.success("Datei erfolgreich gespeichert.")
+
+        except Exception as e:
+            st.error(f"Fehler beim Speichern: {e}")
