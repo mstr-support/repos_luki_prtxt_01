@@ -7,6 +7,9 @@ import pandas as pd
 from io import BytesIO
 import re
 
+# for selling point config
+from azure.storage.blob import BlobClient
+
 
 #helper functions
 # add helper functions if needed
@@ -345,7 +348,7 @@ def fnct_ptxt(text: str) -> str:
 
 st.title("[LUKI] Produkttexte")
 
-tab1, tab2 = st.tabs(["Produkttexte", "SEO-Optimierung"])
+tab1, tab2, tab3 = st.tabs(["Produkttexte", "SEO-Optimierung","Selling Points Config"])
 
 
 #
@@ -813,3 +816,17 @@ with tab2:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 key="seo_download_button"
             )
+
+
+####
+# 
+# 3rd Tab for Selling Point Config
+#
+#
+
+with tab3:
+
+    with st.expander("Information"):
+        st.markdown("""
+            <p>Hier kannst du die Selling Points Konfiguration direkt bearbeiten und speichern.</p>
+        """, unsafe_allow_html=True)
