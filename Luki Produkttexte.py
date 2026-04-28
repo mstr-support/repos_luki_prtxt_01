@@ -870,8 +870,12 @@ with tab3:
                 tab3_edited_df.to_excel(writer, index=False, sheet_name="Seite1")
             buffer.seek(0)
 
+            # get sas Token
+            # sas_token = st.secrets["AZURE_SAS_TOKEN"]
+            # blob_url_with_sas = f"{AZURE_BLOB_URL}{sas_token}"
+
             # write byte stream to blob storage            
-            blob_client = BlobClient.from_blob_url(st.secrets["AZURE_BLOB_URL"])
+            blob_client = BlobClient.from_blob_url(f"{st.secrets["AZURE_BLOB_URL"]}{st.secrets["AZURE_SAS_TOKEN"]}")
             blob_client.upload_blob(buffer, overwrite=True)
 
             # update session state
