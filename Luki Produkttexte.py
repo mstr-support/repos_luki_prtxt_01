@@ -856,8 +856,7 @@ with tab3:
     tab3_edited_df = st.data_editor(
         st.session_state.tab3_df,
         use_container_width=True,
-        num_rows="dynamic",
-        key="tab3_editor"
+        num_rows="dynamic"
     )
 
 
