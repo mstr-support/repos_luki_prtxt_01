@@ -846,7 +846,8 @@ with tab3:
     # Button to manually reload the file
     if st.button("🔄 Neu laden", key="tab3_reload"):
         try:
-            st.session_state.tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            st.session_state.tab3_df = tab3_df
             st.success("Datei neu geladen.")
         except Exception as e:
             st.error(f"Fehler beim Laden: {e}")
