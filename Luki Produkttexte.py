@@ -834,6 +834,10 @@ with tab3:
             <p> </p>
         """, unsafe_allow_html=True)
 
+    # reload counter -> need to reset the content of the data editor, when pressing reload
+    if "tab3_reload_counter" not in st.session_state:
+        st.session_state.tab3_reload_counter = 0
+
     # load excel if not yet done
     if "tab3_df" not in st.session_state:
         try:
@@ -846,9 +850,14 @@ with tab3:
     # Button to manually reload the file
     if st.button("🔄 Neu laden", key="tab3_reload"):
         try:
+            # increase reload counter
+            st.session_state.tab3_reload_counter += 1
+
+            # reload excel file
             tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
             st.session_state.tab3_df = tab3_df
             st.success("Datei neu geladen.")
+
         except Exception as e:
             st.error(f"Fehler beim Laden: {e}")
 
@@ -856,7 +865,9 @@ with tab3:
     tab3_edited_df = st.data_editor(
         st.session_state.tab3_df,
         use_container_width=True,
-        num_rows="dynamic"
+        num_rows="dynamic",
+        # reload counter is part of the key, to regenerate data editor
+        key=f"tab3_editor_{st.session_state.tab3_reload_counter}"
     )
 
 
