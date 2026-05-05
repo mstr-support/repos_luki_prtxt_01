@@ -353,7 +353,7 @@ def fnct_selling_point(
     #
 
     # filter selling point data only for relevant rows
-    df_sp = tab3_df[tab3_df["Relevant"].astype(str).str.strip().str.upper() == "J"].copy()
+    df_sp = st.session_state.tab3_df[st.session_state.tab3_df["Relevant"].astype(str).str.strip().str.upper() == "J"].copy()
 
     # filter for Marke
     marke_str = str(marke).strip().upper()
