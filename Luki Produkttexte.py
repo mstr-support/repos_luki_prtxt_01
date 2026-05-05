@@ -329,6 +329,76 @@ def fnct_ptxt(text: str) -> str:
 
     return text
 
+
+# Funktion für Selling Point Text Ersetzung
+def fnct_selling_point(
+    attribut1: str,
+    wert1: str,    
+    marke: str = None,
+    attribut2: str = None,
+    wert2: str = None
+):
+
+    # load Selling point Excel file if not yet done    
+    if "tab3_df" not in st.session_state:
+        try:
+            tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            st.session_state.tab3_df = tab3_df
+        except Exception as e:
+            st.error(f"Fehler beim Laden der Datei: {e}")
+            st.stop()
+
+    #
+    # general filters
+    #
+
+    # filter selling point data only for relevant rows
+    df_sp = tab3_df[tab3_df["Relevant"].astype(str).str.strip().str.upper() == "J"].copy()
+
+    # filter for Marke
+    marke_str = str(marke).strip().upper()
+
+    df_sp = df_sp[
+        df_sp["Marke"].astype(str).str.strip().str.upper().isin(["ALLE", marke_str])
+    ]
+
+
+    #
+    # differ between different lookups
+    # 1 -> map only Attribute 1
+    # 2 -> map Attribute 1 and Attribute 2
+    #
+
+    if attribut2 is None:
+
+        wert1_str = str(wert1).strip()
+
+        # simple lookup via attribute 1
+        df_sp_filtered = df_sp[
+            (df_sp["Attribut 1"].astype(str).str.strip() == attribut1) &
+            (df_sp["Wert 1"].astype(str).str.strip().str.lower() == wert1_str.lower())
+        ]       
+
+    else:
+
+        wert1_str = str(wert1).strip()
+        wert2_str = str(wert2).strip() if pd.notna(wert2) else ""
+
+        # lookup for both attribute (e.g. for Wechselfußbet)
+        df_sp_filtered = df_sp[
+            (df_sp["Attribut 1"].astype(str).str.strip() == attribut1) &
+            (df_sp["Wert 1"].astype(str).str.strip().str.lower() == wert1_str.lower()) &
+            (df_sp["Attribut 2"].astype(str).str.strip() == attribut2) &
+            (df_sp["Wert 2"].astype(str).str.strip().str.lower() == wert2_str.lower())
+        ]
+
+
+    # return first selling point text of filtered dataframe
+    return str(df_sp_filtered.iloc[0]["Selling Point Text"]).strip()
+
+
+
+
 # build config for authenticator
 # -> not needed here
 
@@ -513,8 +583,16 @@ with tab1:
                             #"Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
                             "Laufsohleneigenschaften": fnct_lfso(tab1_df_org_data.loc[rows_indx, "Saison"], tab1_df_org_data.loc[rows_indx, "Laufsohle"], tab1_df_org_data.loc[rows_indx, "Marke"]),
                             #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
-                            "Nachhaltigkeit": tab1_df_org_data.loc[rows_indx, "Nachhaltigkeit"],
-                            "Membrane": tab1_df_org_data.loc[rows_indx, "Membrane"],
+                            "Nachhaltigkeit": fnct_selling_point(
+                                'Nachhaltigkeit',
+                                tab1_df_org_data.loc[rows_indx, "Nachhaltigkeit"],
+                                tab1_df_org_data.loc[rows_indx, "Marke"]
+                                ),
+                            "Membrane": fnct_selling_point(
+                                'Membrane',
+                                tab1_df_org_data.loc[rows_indx, "Membrane"],
+                                tab1_df_org_data.loc[rows_indx, "Marke"]
+                                ),
                             "Futtermaterial": tab1_df_org_data.loc[rows_indx, "Futtermaterial"],                        
                             "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
                             "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])                                              
@@ -527,6 +605,8 @@ with tab1:
                     Attribute:
                     {inpt_vatr}
                     """
+
+                    st.write(final_prompt)
 
                     response = client.chat.completions.create(
                         model=gpts_modl,
