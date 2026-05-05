@@ -596,7 +596,7 @@ with tab1:
                                 tab1_df_org_data.loc[rows_indx, "Membrane"],
                                 tab1_df_org_data.loc[rows_indx, "Marke"]
                                 ),                            
-                            "Futtermaterial": fnct_selling_point(
+                            "Futtermaterial": fnct_selling_point( 
                                 'Futtermaterial',
                                 tab1_df_org_data.loc[rows_indx, "Futtermaterial"],
                                 tab1_df_org_data.loc[rows_indx, "Marke"]
