@@ -393,8 +393,11 @@ def fnct_selling_point(
         ]
 
 
-    # return first selling point text of filtered dataframe
-    return str(df_sp_filtered.iloc[0]["Selling Point Text"]).strip()
+    # return first selling point text of filtered dataframe (if there's data)
+    if len(df_sp_filtered) > 0:
+        return str(df_sp_filtered.iloc[0]["Selling Point Text"]).strip()
+    else:
+        return wert1_str
 
 
 
