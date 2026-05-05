@@ -598,7 +598,15 @@ with tab1:
                                 ),
                             "Futtermaterial": tab1_df_org_data.loc[rows_indx, "Futtermaterial"],                        
                             "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
-                            "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])                                              
+                            # Alte Logik für Einlegesohle
+                            # "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])     
+                            "Einlegesohle": fnct_selling_point(
+                                "Wechselfußbett",
+                                tab1_df_org_data.loc[rows_indx, "Wechselfußbett"],                                
+                                tab1_df_org_data.loc[rows_indx, "Marke"],
+                                "Decksohle",                       
+                                tab1_df_org_data.loc[rows_indx, "Decksohle"]
+                            )                                           
                         }.items()
                         if pd.notna(val) and str(val).strip() != ""
                     )
