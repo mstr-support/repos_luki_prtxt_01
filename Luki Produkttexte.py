@@ -595,8 +595,12 @@ with tab1:
                                 'Membrane',
                                 tab1_df_org_data.loc[rows_indx, "Membrane"],
                                 tab1_df_org_data.loc[rows_indx, "Marke"]
-                                ),
-                            "Futtermaterial": tab1_df_org_data.loc[rows_indx, "Futtermaterial"],                        
+                                ),                            
+                            "Futtermaterial": fnct_selling_point(
+                                'Futtermaterial',
+                                tab1_df_org_data.loc[rows_indx, "Futtermaterial"],
+                                tab1_df_org_data.loc[rows_indx, "Marke"]
+                                ),                     
                             "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
                             # Alte Logik für Einlegesohle
                             # "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])     
