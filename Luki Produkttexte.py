@@ -37,15 +37,15 @@ inpt_prmt = (
     "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
     "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
 	"Der erste Satz muss Produktname und Produkttyp enthalten."
-    "Produktname + Produkttyp immer mit Artikel (zB Der Sneaker XXX, die Hausschuhe YYY)"
-    "Füge manchmal auch das Geschlecht zum Produkttyp, zB Herrensneaker, Damenschuh"
+    "Produktname + Produkttyp immer mit Artikel (zB Der Sneaker XXX, die Hausschuhe YYY)."
+    "Füge manchmal auch das Geschlecht zum Produkttyp, zB Herrensneaker, Damenschuh."
 	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
     "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
 	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
     "Achte auf eine natürliche, menschlich klingende Sprache."
     "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
     "Halte die Textlänge zwischen 500-550 Zeichen, erwähne nie das Wort Leisten."
-    "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben"
+    "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben."
 )
 
 # Prompt for product text review
