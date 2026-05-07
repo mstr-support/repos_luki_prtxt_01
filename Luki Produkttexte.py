@@ -772,10 +772,6 @@ with tab2:
                     <p>
                     In diesem Reiter können bereits erstellte und manuell geprüfte Produkttexte SEO-optimiert werden.
                     Bitte lade die Output-Datei aus der Produkttexterstellung hoch.
-                    </p> <p>                                     
-                    Viel Spaß!</p> <p> </p>
-                    Robert
-                    <p> </p>
                     """, unsafe_allow_html=True)
                 
 
