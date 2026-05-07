@@ -643,8 +643,21 @@ with tab1:
                     text_output = fnct_ptxt(text_output)
 
                     modl = tab1_df_org_data["Modellnr"].iloc[rows_indx]
+                    
+                    # added with LEG-258
+                    saison = tab1_df_org_data["Saison"].iloc[rows_indx]
+                    marke = tab1_df_org_data["Marke"].iloc[rows_indx]
+                    gruppe = tab1_df_org_data["Gruppe"].iloc[rows_indx]                    
+                    produkttyp = tab1_df_org_data["Produkttyp"].iloc[rows_indx]
+
                     list_output_data.append({
                         "Modell": modl,
+                        # LEG-258
+                        "Saison": saison,
+                        "Marke": marke, 
+                        "Gruppe": gruppe,
+                        "Produkttyp": produkttyp,
+                        ##
                         "Produkttext": text_output,
                         "Response_ID": response.id,
                         "Created_UTC": datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"),
@@ -710,6 +723,8 @@ with tab1:
             # used tokens are summed up
 
             tab1_df_output_data["Produkttext"] = reviewed_texts
+            # LEG-258 Länge des Produkttextes eingefügt
+            tab1_df_output_data["Länge()"] = tab1_df_output_data["Produkttext"].str.len()
             tab1_df_output_data["Response_ID"] = review_response_ids
             tab1_df_output_data["Created_UTC"] = review_created_utc
             tab1_df_output_data["Model"] = review_models
