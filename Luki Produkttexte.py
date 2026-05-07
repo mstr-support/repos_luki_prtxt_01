@@ -672,8 +672,11 @@ with tab1:
                     rows_indx += 1
 
             # transform list to dataframe for Excel export
-            tab1_df_output_data =  pd.DataFrame(list_output_data, columns=["Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"])
-            
+            tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
+                "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
+                "Produkttext", "Response_ID", "Created_UTC", "Model",
+                "Prompt_Tokens", "Completion_Tokens"
+            ])
 
             # review the gernerated product 
             with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
