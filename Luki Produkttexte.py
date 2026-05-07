@@ -651,7 +651,7 @@ with tab1:
                     saison = tab1_df_org_data["Saison"].iloc[rows_indx]
                     marke = tab1_df_org_data["Marke"].iloc[rows_indx]
                     gruppe = tab1_df_org_data["Gruppe"].iloc[rows_indx]                    
-                    produkttyp = tab1_df_org_data["Produkttyp"].iloc[rows_indx]
+                    produkttyp = tab1_df_org_data["Produkttyp OS"].iloc[rows_indx]
 
                     list_output_data.append({
                         "Modell": modl,
