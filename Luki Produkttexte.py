@@ -161,16 +161,16 @@ def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
 
             # Laufsohle unterscheiden
             if str(laufsohle).strip().upper().startswith("PU"):
-                return "flexibel, leicht, hoher Tragekomfort"
+                return "Leicht, rutschhemmend, flexibel: die PU-Laufsohle"
             
             elif str(laufsohle).strip().upper().startswith("TPU"):
-                return "optimaler Grip, rutschhemmend, abriebfest"
+                return "Leicht, rutschhemmend, flexibel: die TPU-Laufsohle"
 
             elif str(laufsohle).strip().upper().startswith("TPR"):
                 return "rutschhemmend, flexibel"
             
             elif str(laufsohle).strip().upper().startswith("GUMMI"):
-                return "abriebfest, rutschhemmend, flexibel"
+                return "Dämpft jeden Schritt: die Sohle aus Gummi"
             
             elif str(laufsohle).strip().upper().startswith("PVC"):
                 return "nicht abfärbend, flexibel, leicht"
@@ -179,7 +179,7 @@ def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
                 return "aus nachwachsendem Rohstoff, flexibel, natürliche Abrollbewegung"
             
             elif str(laufsohle).strip().upper().startswith("EVA"):
-                return "sehr leicht, flexibel, hoher Tragekomfort"
+                return "Leicht, flexibel und dämpfend: die Sohle aus EVA"
             
             elif str(laufsohle).strip().upper().startswith("PHYLON"):
                 return "sehr leicht, flexibel, hoher Tragekomfort"
@@ -583,7 +583,7 @@ with tab1:
                             "Modellbeschreibung": tab1_df_org_data.loc[rows_indx, "Modellbeschreibung"],     
                             "Produkttyp": fnct_ptyp(tab1_df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
                             "Geschlecht": fnct_gesl(tab1_df_org_data.loc[rows_indx, "Marke"], tab1_df_org_data.loc[rows_indx, "Geschlecht"]),
-                            #"Verschluss": fnct_vrsl(df_org_data.loc[rows_indx, "Verschluss"]),
+                            "Verschluss": fnct_vrsl(tab1_df_org_data.loc[rows_indx, "Verschluss"]),
                             "Laufsohleneigenschaften": fnct_lfso(tab1_df_org_data.loc[rows_indx, "Saison"], tab1_df_org_data.loc[rows_indx, "Laufsohle"], tab1_df_org_data.loc[rows_indx, "Marke"]),
                             #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
                             "Nachhaltigkeit": fnct_selling_point(
@@ -601,7 +601,10 @@ with tab1:
                                 tab1_df_org_data.loc[rows_indx, "Futtermaterial"],
                                 tab1_df_org_data.loc[rows_indx, "Marke"]
                                 ),                     
-                            "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
+                            "Schuhweite": fnct_selling_point(
+                                tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
+                                tab1_df_org_data.loc[rows_indx, "Marke"]
+                            ),
                             # Alte Logik für Einlegesohle
                             # "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])     
                             "Einlegesohle": fnct_selling_point(
