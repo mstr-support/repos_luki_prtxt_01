@@ -96,8 +96,7 @@ tab1_required_columns = [
 ]
 
 tab2_required_columns = [
-    "Modell", "Produkttext", "Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens"
-]
+    "Artikelvariante", "Modell", "Produkttext", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial"]
 
 
 
