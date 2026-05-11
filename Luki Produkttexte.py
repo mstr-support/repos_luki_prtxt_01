@@ -63,23 +63,19 @@ inpt_prmt_review = (
 
 # Prompt for SEO optimization
 inpt_prmt_seo = (
-    "Du bist ein SEO-Texter.\n\n"
-    "Aufgabe:\n"
-    "SEO-optimiere den folgenden Produkttext.\n\n"
-    "Anforderungen:\n"
-    "- Verwende relevante Keywords natürlich im Text (z. B. Sneaker, Herren, bequem, Leder, wasserdicht, etc.)\n"
-    "- Vermeide Keyword-Stuffing\n"
-    "- Schreibe klar, strukturiert und verkaufsorientiert\n"
-    "- Länge des Inputes ungefähr beibehalten\n"
-    "- Ein zusammenhängender Absatz (kein Bullet-Format)\n\n"
-    "Stil:\n"
-    "- Sachlich, modern, hochwertig\n"
-    "- Keine Wiederholungen\n"
-    "- Aktive Sprache\n\n"
-    "Output:\n"
-    "Nur den optimierten Text zurückgeben.\n\n"
-    "Input:\n"
-    "{{PRODUCT_TEXT}}"
+    "Aufgabe: Vergleiche einen Ausgangstext mit einem oder mehreren zu prüfenden Produkttexten. "
+    "Überarbeite jeden Prüfling so, dass er sprachlich korrekt, verkaufsstark und eigenständig formuliert ist. "
+    "Regeln: Prüfe jeden Text auf identische oder zu nah übernommene Formulierungen aus dem Ausgangstext. "
+    "Prüfe zusätzlich, ob sich die Prüflinge untereinander zu ähnlich klingen. "
+    "Inhalte dürfen ähnlich sein, Formulierungen nicht. "
+    "Formuliere gleiche Satzanfänge, Schlusssätze, Nutzenargumente und Standardphrasen abwechslungsreich um. "
+    "Erhalte alle sachlichen Produktinformationen des jeweiligen Textes. "
+    "Behalte die SEO- und GEO-Optimierung der Texte bei. "
+    "Erfinde keine neuen Eigenschaften. "
+    "Korrigiere Grammatik, Rechtschreibung und Zeichensetzung wenn notwendig. "
+    "Jeder finale Text soll mindestens 550 Zeichen inklusive Leerzeichen haben. "
+    "Gib ausschließlich die überarbeiteten Texte als JSON zurück. Keine Analyse. Keine Erklärungen. "
+    "Format: {\"1\": \"text prüfling 1\", \"2\": \"text prüfling 2\", ...}"
 )
 
 #
@@ -785,12 +781,28 @@ with tab2:
     with st.expander("Information"):
                 
 
-                st.markdown("""
-                    <p>
-                    In diesem Reiter können bereits erstellte und manuell geprüfte Produkttexte SEO-optimiert werden.
-                    Bitte lade die Output-Datei aus der Produkttexterstellung hoch.
-                    """, unsafe_allow_html=True)
+        st.markdown("""
+            <p>
+            In diesem Reiter können bereits erstellte und manuell geprüfte Produkttexte SEO-optimiert werden.
+            Bitte lade die Output-Datei aus der Produkttexterstellung hoch.
+            """, unsafe_allow_html=True)
                 
+
+    #
+    # LEG-259 prompt text
+    #  -> is saved in the session state and can be adapted
+    with st.expander("Prompt text"):
+
+        # of not yet existing, take default prompt text
+        if "tab2_seo_prompt" not in st.session_state:
+            st.session_state.tab2_seo_prompt = inpt_prmt_seo
+
+        st.session_state.tab2_seo_prompt = st.text_area(
+                                                        "Prompt",
+                                                        value=st.session_state.tab2_seo_prompt,
+                                                        height=200,
+                                                        key="tab2_prompt_input"
+                                                    )
 
     # upoad butte for Excel file
     tab2_uploaded_file = st.file_uploader("Excel Datei mit generierten Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
