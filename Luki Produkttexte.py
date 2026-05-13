@@ -62,6 +62,9 @@ inpt_prmt_review = (
 )
 
 # Prompt for SEO optimization
+
+# prompt for step 1
+
 inpt_prmt_seo = (
     "Aufgabe: Vergleiche einen Ausgangstext mit einem oder mehreren zu prüfenden Produkttexten. "
     "Überarbeite jeden Prüfling so, dass er sprachlich korrekt, verkaufsstark und eigenständig formuliert ist. "
@@ -860,8 +863,12 @@ with tab2:
 
         if st.session_state.tab2_generation_done:
             tab2_df_output_data = st.session_state.tab2_df_output_data
+        
+        #
+        # step 1: generate 
+        #
 
-        if st.button("SEO-Texte generieren", key="seo_generate_button"):
+        if st.button("SEO-Texte generieren pro Artikelvariante", key="seo_generate_button"):
 
             client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
             tab2_output_rows = []
@@ -869,8 +876,17 @@ with tab2:
             with st.spinner("SEO-Optimierung läuft...", show_time=True):
                 for idx in tab2_df_org_data.index:
                     original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
+                    # add with LEG-259
+                    farbe = str(tab2_df_org_data.loc[idx, "Farbe_Suche_1"]).strip()
+                    matart = str(tab2_df_org_data.loc[idx, "MatArt_Obermaterial"]).strip()
 
-                    seo_prompt = inpt_prmt_seo.replace("{{PRODUCT_TEXT}}", original_text)
+                    variant_input = (
+                        f"Produkttext: {original_text}\n"
+                        f"Farbe: {farbe}\n"
+                        f"Materialart Obermaterial: {matart}"
+                    )
+
+                    seo_prompt = f"{st.session_state.tab2_seo_prompt}\n\nInput:\n{variant_input}"
 
                     seo_response = client.chat.completions.create(
                         model=gpts_modl,
@@ -880,6 +896,8 @@ with tab2:
                         ],
                         temperature=0.5
                     )
+
+                    st.write(seo_response)
 
                     seo_text = seo_response.choices[0].message.content
                     seo_text = fnct_ptxt(seo_text)
