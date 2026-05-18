@@ -688,7 +688,7 @@ with tab1:
                 review_completion_tokens = []
 
                 # loop over every generated row
-                for idx in tab1_df_output_data.index:
+                for idx in tab1_df_output_data.index:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
                     original_text = tab1_df_output_data.loc[idx, "Produkttext"]
 
                     review_prompt = f"""
@@ -868,12 +868,12 @@ with tab2:
         # step 1: generate 
         #
 
-        if st.button("SEO-Texte generieren pro Artikelvariante", key="seo_generate_button"):
+        if st.button("SEO-Texte generieren", key="seo_generate_button"):
 
             client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
             tab2_output_rows = []
 
-            with st.spinner("SEO-Optimierung läuft...", show_time=True):
+            with st.spinner("SEO-Optimierung läuft pro Artikelvariante...", show_time=True):
                 for idx in tab2_df_org_data.index:
                     original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
                     # add with LEG-259
@@ -902,14 +902,9 @@ with tab2:
                     seo_text = seo_response.choices[0].message.content
                     seo_text = fnct_ptxt(seo_text)
 
-                    # add Tokens to already used tokens 
-                    original_prompt_tokens = tab2_df_org_data.loc[idx, "Prompt_Tokens"]
-                    original_completion_tokens = tab2_df_org_data.loc[idx, "Completion_Tokens"]
+                    st.write(seo_text)
 
-                    if pd.isna(original_prompt_tokens):
-                        original_prompt_tokens = 0
-                    if pd.isna(original_completion_tokens):
-                        original_completion_tokens = 0
+                    
 
                     tab2_output_rows.append({
                         "Modell": tab2_df_org_data.loc[idx, "Modell"],
@@ -917,8 +912,8 @@ with tab2:
                         "Response_ID": seo_response.id,
                         "Created_UTC": datetime.fromtimestamp(seo_response.created).strftime("%d.%m.%Y %H:%M:%S"),
                         "Model": seo_response.model,
-                        "Prompt_Tokens": int(original_prompt_tokens) + seo_response.usage.prompt_tokens,
-                        "Completion_Tokens": int(original_completion_tokens) + seo_response.usage.completion_tokens
+                        "Prompt_Tokens": seo_response.usage.prompt_tokens,
+                        "Completion_Tokens": seo_response.usage.completion_tokens
                     })
 
             tab2_df_output_data = pd.DataFrame(
