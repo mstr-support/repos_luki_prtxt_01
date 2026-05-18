@@ -823,7 +823,7 @@ with tab2:
                                                         "Prompt",
                                                         value=st.session_state.tab2_seo_prompt_1,
                                                         height=200,
-                                                        key="tab2_prompt_input"
+                                                        key="tab2_prompt_input_1"
                                                     )
         
     with st.expander("Prompt text model divercification"):
@@ -836,7 +836,7 @@ with tab2:
                                                         "Prompt",
                                                         value=st.session_state.tab2_seo_prompt_2,
                                                         height=200,
-                                                        key="tab2_prompt_input"
+                                                        key="tab2_prompt_input_2"
                                                     )
 
     # upoad butte for Excel file
