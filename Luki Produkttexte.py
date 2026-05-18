@@ -66,19 +66,8 @@ inpt_prmt_review = (
 # prompt for step 1
 
 inpt_prmt_seo_1 = (
-    "Aufgabe: Vergleiche einen Ausgangstext mit einem oder mehreren zu prüfenden Produkttexten. "
-    "Überarbeite jeden Prüfling so, dass er sprachlich korrekt, verkaufsstark und eigenständig formuliert ist. "
-    "Regeln: Prüfe jeden Text auf identische oder zu nah übernommene Formulierungen aus dem Ausgangstext. "
-    "Prüfe zusätzlich, ob sich die Prüflinge untereinander zu ähnlich klingen. "
-    "Inhalte dürfen ähnlich sein, Formulierungen nicht. "
-    "Formuliere gleiche Satzanfänge, Schlusssätze, Nutzenargumente und Standardphrasen abwechslungsreich um. "
-    "Erhalte alle sachlichen Produktinformationen des jeweiligen Textes. "
-    "Behalte die SEO- und GEO-Optimierung der Texte bei. "
-    "Erfinde keine neuen Eigenschaften. "
-    "Korrigiere Grammatik, Rechtschreibung und Zeichensetzung wenn notwendig. "
-    "Jeder finale Text soll mindestens 550 Zeichen inklusive Leerzeichen haben. "
-    "Gib ausschließlich die überarbeiteten Texte als JSON zurück. Keine Analyse. Keine Erklärungen. "
-    "Format: {\"1\": \"text prüfling 1\", \"2\": \"text prüfling 2\", ...}"
+    "Aufgabe: Du erhälst einen Produkttext, der für ein Modell komplett gleich ist."
+    "Erzeuge auf Basis der zusätzlichen Informationen einen Text für eine einzelne Artikelvariante."
 )
 
 # prompt for step 2
