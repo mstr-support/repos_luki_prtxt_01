@@ -957,15 +957,33 @@ with tab2:
                     if len(gruppe) < 2:
                         continue
 
-                    indices       = gruppe.index.tolist()
-                    ausgangstext  = tab2_df_output_data.loc[indices[0], "Produkttext"]
-                    prueflinge    = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]
-                                     for i, idx in enumerate(indices[1:])}
+                    indices  = gruppe.index.tolist()
+
+                    # get all produkttexte
+                    prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]
+                                     for i, idx in enumerate(indices[1:])}                                 
                     
+                    # join single artikelvariante produkttexte to one text for the prompt
+                    pruefling_block = "\n\n".join(
+                        f"Prüfling {k}:\n{v}" for k, v in prueflinge.items()
+                    )     
 
+                    # create prompt
+                    div_prompt = (
+                        f"{st.session_state.tab2_seo_prompt_2}\n\n"                        
+                        f"{pruefling_block}"
+                    )
 
+                    div_response = client.chat.completions.create(
+                        model=gpts_modl,
+                        messages=[
+                            {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig auf Deutsch."},
+                            {"role": "user",   "content": div_prompt}
+                        ],
+                        temperature=0.7
+                    )
 
-
+                    st.write(div_response)
             
 
 
