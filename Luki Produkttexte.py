@@ -952,8 +952,6 @@ with tab2:
                 # loop over model combinations
                 for modell, gruppe in tab2_df_output_data.groupby("Modell", sort=False):
 
-                    st.write(gruppe)
-
                     # only re-check text, if there are minimum
                     # 2 article variants per model
                     if len(gruppe) < 2:
@@ -961,14 +959,20 @@ with tab2:
 
                     indices  = gruppe.index.tolist()
 
+                    st.write(indices)
+
                     # get all produkttexte
                     prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]
                                      for i, idx in enumerate(indices[1:])}                                 
                     
+                    st.write(prueflinge)
+
                     # join single artikelvariante produkttexte to one text for the prompt
                     pruefling_block = "\n\n".join(
                         f"Prüfling {k}:\n{v}" for k, v in prueflinge.items()
-                    )     
+                    )
+
+                    st.write(pruefling_block)     
 
                     # create prompt
                     div_prompt = (
