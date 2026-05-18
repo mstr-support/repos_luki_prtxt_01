@@ -993,6 +993,8 @@ with tab2:
                     raw    = div_response.choices[0].message.content
                     clean  = re.sub(r"```json|```", "", raw).strip()
                     parsed = json.loads(clean)
+
+                    st.write(parsed)
                     
                     # write back adapted Produkttexte to
                     # output data
@@ -1007,12 +1009,12 @@ with tab2:
                             tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
                             tab2_df_output_data.loc[idx, "Completion_Tokens"]  += div_response.usage.completion_tokens // len(prueflinge)
 
-                            tab2_df_output_data.loc[idx, "Completion_Tokens"] = parsed[key].str.len()
+                            tab2_df_output_data.loc[idx, "Completion_Tokens"] = parsed[key].len()
                     
 
             st.session_state.tab2_df_output_data = tab2_df_output_data
             st.session_state.seo_done = True
-            
+
 
         if tab2_df_output_data is not None:
             st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
