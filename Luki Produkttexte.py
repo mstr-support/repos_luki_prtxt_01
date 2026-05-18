@@ -963,7 +963,7 @@ with tab2:
 
                     # get all produkttexte
                     prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]
-                                     for i, idx in enumerate(indices[1:])}                                 
+                                     for i, idx in enumerate(indices[0:])}                                 
                     
                     st.write(prueflinge)
 
