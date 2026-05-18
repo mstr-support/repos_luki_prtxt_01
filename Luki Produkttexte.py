@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas as pd
 from io import BytesIO
 import re
+import json
 
 # for selling point config
 from azure.storage.blob import BlobClient
@@ -957,30 +958,24 @@ with tab2:
                     if len(gruppe) < 2:
                         continue
 
-                    indices  = gruppe.index.tolist()
+                    indices  = gruppe.index.tolist()                   
 
-                    st.write(indices)
-
-                    # get all produkttexte
+                    # get all produkttexte in a list
                     prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]
-                                     for i, idx in enumerate(indices[0:])}                                 
+                                    for i, idx in enumerate(indices[0:])}                   
                     
-                    st.write(prueflinge)
 
                     # join single artikelvariante produkttexte to one text for the prompt
                     pruefling_block = "\n\n".join(
                         f"Prüfling {k}:\n{v}" for k, v in prueflinge.items()
                     )
-
-                    st.write(pruefling_block)     
+                
 
                     # create prompt
                     div_prompt = (
                         f"{st.session_state.tab2_seo_prompt_2}\n\n"                        
                         f"{pruefling_block}"
                     )
-
-                    st.write(div_prompt)
 
                     div_response = client.chat.completions.create(
                         model=gpts_modl,
@@ -992,24 +987,32 @@ with tab2:
                     )
 
                     st.write(div_response)
-            
 
+                    # the response contains a JSON with a list of all
+                    # the adapted Produkttexte                    
+                    raw    = div_response.choices[0].message.content
+                    clean  = re.sub(r"```json|```", "", raw).strip()
+                    parsed = json.loads(clean)
+                    
+                    # write back adapted Produkttexte to
+                    # output data
+                    for i, idx in enumerate(indices[0:]):
+                        key = str(i + 1)
+                        if key in parsed:
 
-            tab2_df_output_data = pd.DataFrame(
-                tab2_output_rows,
-                columns=[
-                    "Modell",
-                    "Produkttext",
-                    "Response_ID",
-                    "Created_UTC",
-                    "Model",
-                    "Prompt_Tokens",
-                    "Completion_Tokens"
-                ]
-            )
+                            # write back new Produkttext
+                            tab2_df_output_data.loc[idx, "Produkttext"] = fnct_ptxt(parsed[key])
+
+                            # prompt tokens get devided by the number of Artikelvariante per Modell
+                            tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
+                            tab2_df_output_data.loc[idx, "Completion_Tokens"]  += div_response.usage.completion_tokens // len(prueflinge)
+
+                            tab2_df_output_data.loc[idx, "Completion_Tokens"] = parsed[key].str.len()
+                    
 
             st.session_state.tab2_df_output_data = tab2_df_output_data
             st.session_state.seo_done = True
+            
 
         if tab2_df_output_data is not None:
             st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
