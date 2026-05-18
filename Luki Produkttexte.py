@@ -65,7 +65,7 @@ inpt_prmt_review = (
 
 # prompt for step 1
 
-inpt_prmt_seo = (
+inpt_prmt_seo_1 = (
     "Aufgabe: Vergleiche einen Ausgangstext mit einem oder mehreren zu prüfenden Produkttexten. "
     "Überarbeite jeden Prüfling so, dass er sprachlich korrekt, verkaufsstark und eigenständig formuliert ist. "
     "Regeln: Prüfe jeden Text auf identische oder zu nah übernommene Formulierungen aus dem Ausgangstext. "
@@ -80,6 +80,25 @@ inpt_prmt_seo = (
     "Gib ausschließlich die überarbeiteten Texte als JSON zurück. Keine Analyse. Keine Erklärungen. "
     "Format: {\"1\": \"text prüfling 1\", \"2\": \"text prüfling 2\", ...}"
 )
+
+# prompt for step 2
+
+inpt_prmt_seo_2 = (
+    "Aufgabe: Vergleiche einen Ausgangstext mit einem oder mehreren zu prüfenden Produkttexten. "
+    "Überarbeite jeden Prüfling so, dass er sprachlich korrekt, verkaufsstark und eigenständig formuliert ist. "
+    "Regeln: Prüfe jeden Text auf identische oder zu nah übernommene Formulierungen aus dem Ausgangstext. "
+    "Prüfe zusätzlich, ob sich die Prüflinge untereinander zu ähnlich klingen. "
+    "Inhalte dürfen ähnlich sein, Formulierungen nicht. "
+    "Formuliere gleiche Satzanfänge, Schlusssätze, Nutzenargumente und Standardphrasen abwechslungsreich um. "
+    "Erhalte alle sachlichen Produktinformationen des jeweiligen Textes. "
+    "Behalte die SEO- und GEO-Optimierung der Texte bei. "
+    "Erfinde keine neuen Eigenschaften. "
+    "Korrigiere Grammatik, Rechtschreibung und Zeichensetzung wenn notwendig. "
+    "Jeder finale Text soll mindestens 550 Zeichen inklusive Leerzeichen haben. "
+    "Gib ausschließlich die überarbeiteten Texte als JSON zurück. Keine Analyse. Keine Erklärungen. "
+    "Format: {\"1\": \"text prüfling 1\", \"2\": \"text prüfling 2\", ...}"
+)
+
 
 #
 # columns, of the Excel file
@@ -794,15 +813,28 @@ with tab2:
     #
     # LEG-259 prompt text
     #  -> is saved in the session state and can be adapted
-    with st.expander("Prompt text"):
+    with st.expander("Prompt text article variants"):
 
         # of not yet existing, take default prompt text
-        if "tab2_seo_prompt" not in st.session_state:
-            st.session_state.tab2_seo_prompt = inpt_prmt_seo
+        if "tab2_seo_prompt_1" not in st.session_state:
+            st.session_state.tab2_seo_prompt_1 = inpt_prmt_seo_1
 
-        st.session_state.tab2_seo_prompt = st.text_area(
+        st.session_state.tab2_seo_prompt_1 = st.text_area(
                                                         "Prompt",
-                                                        value=st.session_state.tab2_seo_prompt,
+                                                        value=st.session_state.tab2_seo_prompt_1,
+                                                        height=200,
+                                                        key="tab2_prompt_input"
+                                                    )
+        
+    with st.expander("Prompt text model divercification"):
+
+        # of not yet existing, take default prompt text
+        if "tab2_seo_prompt_2" not in st.session_state:
+            st.session_state.tab2_seo_prompt_2 = inpt_prmt_seo_2
+
+        st.session_state.tab2_seo_prompt_2 = st.text_area(
+                                                        "Prompt",
+                                                        value=st.session_state.tab2_seo_prompt_2,
                                                         height=200,
                                                         key="tab2_prompt_input"
                                                     )
@@ -864,14 +896,17 @@ with tab2:
         if st.session_state.tab2_generation_done:
             tab2_df_output_data = st.session_state.tab2_df_output_data
         
-        #
-        # step 1: generate 
-        #
+       
 
         if st.button("SEO-Texte generieren", key="seo_generate_button"):
 
             client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
             tab2_output_rows = []
+
+
+            #
+            # step 1: generate SEO text per Artikelvariante
+            #
 
             with st.spinner("SEO-Optimierung läuft pro Artikelvariante...", show_time=True):
                 for idx in tab2_df_org_data.index:
@@ -915,6 +950,35 @@ with tab2:
                         "Prompt_Tokens": seo_response.usage.prompt_tokens,
                         "Completion_Tokens": seo_response.usage.completion_tokens
                     })
+
+            tab2_df_output_data = pd.DataFrame(tab2_output_rows)
+
+
+            #
+            # step 2: create more divers model text
+            #
+
+            with st.spinner("SEO Optimieriung läuft pro Modell", show_time=True):
+
+                # loop over model combinations
+                for modell, gruppe in tab2_df_output_data.groupby("Modell", sort=False):
+
+                    # only re-check text, if there are minimum
+                    # 2 article variants per model
+                    if len(gruppe) < 2:
+                        continue
+
+                    indices       = gruppe.index.tolist()
+                    ausgangstext  = tab2_df_output_data.loc[indices[0], "Produkttext"]
+                    prueflinge    = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]
+                                     for i, idx in enumerate(indices[1:])}
+                    
+
+
+
+
+            
+
 
             tab2_df_output_data = pd.DataFrame(
                 tab2_output_rows,
