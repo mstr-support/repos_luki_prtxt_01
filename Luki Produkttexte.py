@@ -974,6 +974,8 @@ with tab2:
                         f"{pruefling_block}"
                     )
 
+                    st.write(div_prompt)
+
                     div_response = client.chat.completions.create(
                         model=gpts_modl,
                         messages=[
