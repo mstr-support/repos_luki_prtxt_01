@@ -994,7 +994,6 @@ with tab2:
                     clean  = re.sub(r"```json|```", "", raw).strip()
                     parsed = json.loads(clean)
 
-                    st.write(parsed)
                     
                     # write back adapted Produkttexte to
                     # output data
@@ -1009,7 +1008,8 @@ with tab2:
                             tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
                             tab2_df_output_data.loc[idx, "Completion_Tokens"]  += div_response.usage.completion_tokens // len(prueflinge)
 
-                            tab2_df_output_data.loc[idx, "Completion_Tokens"] = parsed[key].len()
+                            # update length 
+                            tab2_df_output_data.loc[idx, "Länge()"] = len(parsed[key])
                     
 
             st.session_state.tab2_df_output_data = tab2_df_output_data
