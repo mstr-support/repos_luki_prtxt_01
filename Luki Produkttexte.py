@@ -910,7 +910,7 @@ with tab2:
                         f"Materialart Obermaterial: {matart}"
                     )
 
-                    seo_prompt = f"{st.session_state.tab2_seo_prompt}\n\nInput:\n{variant_input}"
+                    seo_prompt = f"{st.session_state.tab2_seo_prompt_1}\n\nInput:\n{variant_input}"
 
                     seo_response = client.chat.completions.create(
                         model=gpts_modl,
