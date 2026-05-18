@@ -952,6 +952,8 @@ with tab2:
                 # loop over model combinations
                 for modell, gruppe in tab2_df_output_data.groupby("Modell", sort=False):
 
+                    st.write(gruppe)
+
                     # only re-check text, if there are minimum
                     # 2 article variants per model
                     if len(gruppe) < 2:
