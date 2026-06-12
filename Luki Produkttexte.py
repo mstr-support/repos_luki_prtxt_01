@@ -112,7 +112,10 @@ tab2_required_columns = [
     "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
     "Artikelvariante", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial",
     "Produkttext", "Response_ID", "Created_UTC", "Model",
-    "Prompt_Tokens", "Completion_Tokens"    
+    "Prompt_Tokens", "Completion_Tokens",
+    # Leg-280
+    "Selling Point 1", "Selling Point 2", "Selling Point 3",
+    "Selling Point 4", "Selling Point 5",    
     ]
 
 
@@ -763,6 +766,9 @@ with tab1:
                                             row=tab1_df_org_data.loc[rows_indx],
                                             marke=tab1_df_org_data.loc[rows_indx, "Marke"]
                                             )
+                    
+
+
 
 
                     list_output_data.append({
@@ -799,6 +805,8 @@ with tab1:
             tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
                 "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
                 "Artikelvariante", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial",
+                "Selling Point 1", "Selling Point 2", "Selling Point 3",
+                "Selling Point 4", "Selling Point 5",
                 "Produkttext", "Response_ID", "Created_UTC", "Model",
                 "Prompt_Tokens", "Completion_Tokens"
             ])
