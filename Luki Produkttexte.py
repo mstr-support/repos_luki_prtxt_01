@@ -756,6 +756,8 @@ with tab1:
                     farbe_suche_1       = tab1_df_org_data["Farbe_Suche_1"].iloc[rows_indx]
                     matart              = tab1_df_org_data["MatArt_Obermaterial"].iloc[rows_indx]
 
+                    st.write('checking selling points')
+
                     # get selling point texts
                     selling_points = fnct_selling_points(
                                             row=tab1_df_org_data.loc[rows_indx],
