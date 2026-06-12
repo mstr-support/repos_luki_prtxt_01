@@ -953,7 +953,11 @@ with tab2:
                     
 
                     tab2_output_rows.append({
-                        "Modell": tab2_df_org_data.loc[idx, "Modell"],
+                        "Modell":           tab2_df_org_data.loc[idx, "Modell"],
+                        "Saison":           tab2_df_org_data.loc[idx, "Saison"],       # neu
+                        "Marke":            tab2_df_org_data.loc[idx, "Marke"],        # neu
+                        "Gruppe":           tab2_df_org_data.loc[idx, "Gruppe"],       # neu
+                        "Produkttyp":       tab2_df_org_data.loc[idx, "Produkttyp"],   # neu
                         "Produkttext": seo_text,
                         "Response_ID": seo_response.id,
                         "Created_UTC": datetime.fromtimestamp(seo_response.created).strftime("%d.%m.%Y %H:%M:%S"),
