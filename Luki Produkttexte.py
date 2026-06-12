@@ -116,6 +116,24 @@ tab2_required_columns = [
     ]
 
 
+#
+# priority for selling points config
+# defines which attributes need to be checked for selling points, order defines the priority
+#
+
+selling_point_checks = [
+    {"attr1": "Barfußschuh",       "attr2": None},
+    {"attr1": "Zertifikate",       "attr2": None},
+    {"attr1": "Leuchtendes Motiv", "attr2": None},
+    {"attr1": "Wasserbeständig",   "attr2": None},
+    {"attr1": "Nachhaltigkeit",    "attr2": None},
+    {"attr1": "Membrane",          "attr2": None},
+    {"attr1": "Wechselfußbett",    "attr2": "Decksohle"},
+    {"attr1": "Futtermaterial",    "attr2": None},
+    {"attr1": "Schuhweite",        "attr2": None},
+    {"attr1": "Non-marking Sohle", "attr2": None},
+    {"attr1": "Made in Europe",    "attr2": None},
+]
 
 # fixed replacement for speficif values
 
@@ -346,7 +364,12 @@ def fnct_ptxt(text: str) -> str:
     return text
 
 
-# Funktion für Selling Point Text Ersetzung
+#
+# selling point functions - both functions are needed to
+# determin selling point texts for all configered attributes
+#
+
+# single function to determin a selling point text for a single attribute combination
 def fnct_selling_point(
     attribut1: str,
     wert1: str,    
@@ -414,6 +437,51 @@ def fnct_selling_point(
         return str(df_sp_filtered.iloc[0]["Selling Point Text"]).strip()
     else:
         return wert1_str
+
+
+# Function to loop over selling point config
+def fnct_selling_points(row: pd.Series, marke: str) -> dict:
+    results = []
+
+    # loop over config
+    for check in selling_point_checks:
+        if len(results) >= 5:
+            # if already 5 selling points reached, stop
+            break
+        
+        # get attributes based on config
+        attr1 = check["attr1"]
+        attr2 = check["attr2"]
+
+        if attr1 not in row.index:
+            continue
+
+        val1 = row[attr1]
+
+        if pd.isna(val1) or str(val1).strip() in ["", "nan"]:
+            continue
+
+        val1_str = str(val1).strip()
+        val2     = row[attr2] if (attr2 and attr2 in row.index) else None
+
+        # call selling point logic for attribute combination
+        sp_text = fnct_selling_point(
+            attribut1=attr1,
+            wert1=val1_str,
+            marke=marke,
+            attribut2=attr2,
+            wert2=val2
+        )
+
+        if sp_text and sp_text != val1_str:
+            results.append(sp_text)
+ 
+    while len(results) < 5:
+        # at empty text, if no 5 selling points exist
+        results.append("")
+
+    return {f"Selling Point {i+1}": results[i] for i in range(5)}
+
 
 
 
@@ -594,6 +662,8 @@ with tab1:
                     inpt_vatr = ", ".join(
                         f"{col}: {val}"
                         for col, val in {
+
+                            # base values are taken or changed
                             "Produktname": tab1_df_org_data.loc[rows_indx, "Gruppe"],
                             "Leistenbeschreibung": tab1_df_org_data.loc[rows_indx, "Leistenbeschreibung"],                             
                             "Modellbeschreibung": tab1_df_org_data.loc[rows_indx, "Modellbeschreibung"],     
@@ -602,34 +672,45 @@ with tab1:
                             "Verschluss": fnct_vrsl(tab1_df_org_data.loc[rows_indx, "Verschluss"]),
                             "Laufsohleneigenschaften": fnct_lfso(tab1_df_org_data.loc[rows_indx, "Saison"], tab1_df_org_data.loc[rows_indx, "Laufsohle"], tab1_df_org_data.loc[rows_indx, "Marke"]),
                             #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
-                            "Nachhaltigkeit": fnct_selling_point(
-                                'Nachhaltigkeit',
-                                tab1_df_org_data.loc[rows_indx, "Nachhaltigkeit"],
-                                tab1_df_org_data.loc[rows_indx, "Marke"]
-                                ),
-                            "Membrane": fnct_selling_point(
-                                'Membrane',
-                                tab1_df_org_data.loc[rows_indx, "Membrane"],
-                                tab1_df_org_data.loc[rows_indx, "Marke"]
-                                ),                            
-                            "Futtermaterial": fnct_selling_point( 
-                                'Futtermaterial',
-                                tab1_df_org_data.loc[rows_indx, "Futtermaterial"],
-                                tab1_df_org_data.loc[rows_indx, "Marke"]
-                                ),                     
-                            "Schuhweite": fnct_selling_point(
-                                tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
-                                tab1_df_org_data.loc[rows_indx, "Marke"]
-                            ),
+
+                            "Nachhaltigkeit": tab1_df_org_data.loc[rows_indx, "Nachhaltigkeit"],
+                            "Membrane": tab1_df_org_data.loc[rows_indx, "Membrane"],
+                            "Futtermaterial": tab1_df_org_data.loc[rows_indx, "Futtermaterial"],                        
+                            "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
+                            "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])
+                            
+                            # Logic from Leg-258 zurückgebaut - muss raus, wenn das so passt
+                            # info aus selling point config lookup wird nicht mehr in die Spalte
+                            # sonder in selling point spalte geschrieben.
+                            #"Nachhaltigkeit": fnct_selling_point(
+                            #    'Nachhaltigkeit',
+                            #    tab1_df_org_data.loc[rows_indx, "Nachhaltigkeit"],
+                            #    tab1_df_org_data.loc[rows_indx, "Marke"]
+                            #    ),
+                            #"Membrane": fnct_selling_point(
+                            #    'Membrane',
+                            #    tab1_df_org_data.loc[rows_indx, "Membrane"],
+                            #    tab1_df_org_data.loc[rows_indx, "Marke"]
+                            #    ),                            
+                            #"Futtermaterial": fnct_selling_point( 
+                            #    'Futtermaterial',
+                            #    tab1_df_org_data.loc[rows_indx, "Futtermaterial"],
+                            #    tab1_df_org_data.loc[rows_indx, "Marke"]
+                            #    ),                     
+                            #"Schuhweite": fnct_selling_point(
+                            #   'Schuheweite', 
+                            #    tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
+                            #    tab1_df_org_data.loc[rows_indx, "Marke"]
+                            #),
                             # Alte Logik für Einlegesohle
                             # "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])     
-                            "Einlegesohle": fnct_selling_point(
-                                "Wechselfußbett",
-                                tab1_df_org_data.loc[rows_indx, "Wechselfußbett"],                                
-                                tab1_df_org_data.loc[rows_indx, "Marke"],
-                                "Decksohle",                       
-                                tab1_df_org_data.loc[rows_indx, "Decksohle"]
-                            )                                                                       
+                            #"Einlegesohle": fnct_selling_point(
+                            #    "Wechselfußbett",
+                            #    tab1_df_org_data.loc[rows_indx, "Wechselfußbett"],                                
+                            #    tab1_df_org_data.loc[rows_indx, "Marke"],
+                            #    "Decksohle",                       
+                            #    tab1_df_org_data.loc[rows_indx, "Decksohle"]
+                            #)                                                                       
                         }.items()
                         if pd.notna(val) and str(val).strip() != ""
                     )
@@ -675,6 +756,13 @@ with tab1:
                     farbe_suche_1       = tab1_df_org_data["Farbe_Suche_1"].iloc[rows_indx]
                     matart              = tab1_df_org_data["MatArt_Obermaterial"].iloc[rows_indx]
 
+                    # get selling point texts
+                    selling_points = fnct_selling_points(
+                                            row=tab1_df_org_data.loc[rows_indx],
+                                            marke=tab1_df_org_data.loc[rows_indx, "Marke"]
+                                            )
+
+
                     list_output_data.append({
                         "Modell": modl,
                         # LEG-258
@@ -689,6 +777,13 @@ with tab1:
                         "MatArt_Obermaterial":matart,
                         ##
                         "Produkttext": text_output,
+                        ## Leg-260
+                        "Selling Point 1":   selling_points["Selling Point 1"],
+                        "Selling Point 2":   selling_points["Selling Point 2"],
+                        "Selling Point 3":   selling_points["Selling Point 3"],
+                        "Selling Point 4":   selling_points["Selling Point 4"],
+                        "Selling Point 5":   selling_points["Selling Point 5"],
+                        #
                         "Response_ID": response.id,
                         "Created_UTC": datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"),
                         "Model": response.model,
@@ -948,9 +1043,7 @@ with tab2:
                     seo_text = seo_response.choices[0].message.content
                     seo_text = fnct_ptxt(seo_text)
 
-                    st.write(seo_text)
-
-                    
+                    st.write(seo_text)                    
 
                     tab2_output_rows.append({
                         "Modell":           tab2_df_org_data.loc[idx, "Modell"],
