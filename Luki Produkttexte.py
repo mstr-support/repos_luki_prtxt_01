@@ -94,7 +94,7 @@ inpt_prmt_seo_2 = (
 # columns, of the Excel file
 #
 tab1_required_columns = [
-    "Marke", "Gruppe", "Saison", "Modell", "Leistenbeschreibung", "Modellbeschreibung",
+    "Marke", "Gruppe", "Saison", "Modellnr", "Leistenbeschreibung", "Modellbeschreibung",
     "Produkttext", 
     "Geschlecht", "Produkttyp OS", "Verschluss",
     "Schuhweite", "Membrane", "Laufsohle",
@@ -743,7 +743,7 @@ with tab1:
                     # Gore Tex in Ergebnis anpassen
                     text_output = fnct_ptxt(text_output)
 
-                    modl = tab1_df_org_data["Modell"].iloc[rows_indx]
+                    modl = tab1_df_org_data["Modellnr"].iloc[rows_indx]
                     
                     # added with LEG-258
                     saison      = tab1_df_org_data["Saison"].iloc[rows_indx]
@@ -751,13 +751,7 @@ with tab1:
                     gruppe      = tab1_df_org_data["Gruppe"].iloc[rows_indx]                    
                     produkttyp  = tab1_df_org_data["Produkttyp OS"].iloc[rows_indx]
 
-                    # added with LEG-259 - for SEO tab
-                    artikelvariante     = tab1_df_org_data["Artikelvariante"].iloc[rows_indx]
-                    farbcode            = tab1_df_org_data["Farbcode"].iloc[rows_indx]
-                    farbe_suche_1       = tab1_df_org_data["Farbe_Suche_1"].iloc[rows_indx]
-                    matart              = tab1_df_org_data["MatArt_Obermaterial"].iloc[rows_indx]
-
-                    
+                                      
                     # get selling point texts
                     selling_points = fnct_selling_points(
                                             row=tab1_df_org_data.loc[rows_indx],
@@ -774,10 +768,10 @@ with tab1:
                         "Gruppe": gruppe,
                         "Produkttyp": produkttyp,
                         # LEG-259
-                        "Artikelvariante":artikelvariante,
-                        "Farbcode":farbcode,
-                        "Farbe_Suche_1":farbe_suche_1,
-                        "MatArt_Obermaterial":matart,
+                        "Artikelvariante":"",
+                        "Farbcode": "",
+                        "Farbe_Suche_1": "",
+                        "MatArt_Obermaterial": "",
                         ##
                         "Produkttext": text_output,
                         ## Leg-260
@@ -818,7 +812,7 @@ with tab1:
                     "Produkttext", "Response_ID", "Created_UTC", "Model",
                     "Prompt_Tokens", "Completion_Tokens"
                 ])
-                
+
 
             # review the gernerated product 
             with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
