@@ -101,10 +101,7 @@ tab1_required_columns = [
     "Absatzart", "Form Schuhspitze", "Nachhaltigkeit", "Barfussschuh",
     "Wechselfußbett", "Decksohle", "Futtermaterial", "Futter Detail", "Zertifikate",
     "Leuchtendes Motiv", "Non-marking Sohle", "Wasserbeständig", "Made in Europe",
-    # LEG 259 - added columns from SEO Optimization
-    # so that file from tab1 can be used for tab2
-    "Artikelvariante", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial"
-]
+    ]
 
 # requires columns for SEO Optimization have to be the same
 # as the output file of product text generation
@@ -642,7 +639,8 @@ with tab1:
         if st.session_state.tab1_generation_done == True:
             tab1_df_output_data = st.session_state.tab1_df_output_data
         
-        
+
+        tab1_add_seo_columns = st.checkbox("SEO-Spalten (Artikelvariante, Farbcode, Farbe_Suche_1, MatArt_Obermaterial) in Ausgabe einfügen")        
 
 
         # button to start generation of produkttexte
@@ -759,18 +757,15 @@ with tab1:
                     farbe_suche_1       = tab1_df_org_data["Farbe_Suche_1"].iloc[rows_indx]
                     matart              = tab1_df_org_data["MatArt_Obermaterial"].iloc[rows_indx]
 
-                    st.write('checking selling points')
-
+                    
                     # get selling point texts
                     selling_points = fnct_selling_points(
                                             row=tab1_df_org_data.loc[rows_indx],
                                             marke=tab1_df_org_data.loc[rows_indx, "Marke"]
                                             )
                     
-
-
-
-
+                    
+                   
                     list_output_data.append({
                         "Modell": modl,
                         # LEG-258
@@ -798,18 +793,32 @@ with tab1:
                         "Prompt_Tokens": response.usage.prompt_tokens,
                         "Completion_Tokens": response.usage.completion_tokens
                     })
+
                     print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
                     rows_indx += 1
 
             # transform list to dataframe for Excel export
-            tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
-                "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
-                "Artikelvariante", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial",
-                "Selling Point 1", "Selling Point 2", "Selling Point 3",
-                "Selling Point 4", "Selling Point 5",
-                "Produkttext", "Response_ID", "Created_UTC", "Model",
-                "Prompt_Tokens", "Completion_Tokens"
-            ])
+            if tab1_add_seo_columns:
+
+                tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
+                    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
+                    "Artikelvariante", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial",
+                    "Selling Point 1", "Selling Point 2", "Selling Point 3",
+                    "Selling Point 4", "Selling Point 5",
+                    "Produkttext", "Response_ID", "Created_UTC", "Model",
+                    "Prompt_Tokens", "Completion_Tokens"
+                ])
+
+            else:
+
+                tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
+                    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",                    
+                    "Selling Point 1", "Selling Point 2", "Selling Point 3",
+                    "Selling Point 4", "Selling Point 5",
+                    "Produkttext", "Response_ID", "Created_UTC", "Model",
+                    "Prompt_Tokens", "Completion_Tokens"
+                ])
+                
 
             # review the gernerated product 
             with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
