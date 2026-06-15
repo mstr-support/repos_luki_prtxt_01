@@ -103,6 +103,7 @@ tab1_required_columns = [
     "Leuchtendes Motiv", "Non-marking Sohle", "Wasserbeständig", "Made in Europe",
     ]
 
+
 # requires columns for SEO Optimization have to be the same
 # as the output file of product text generation
 tab2_required_columns = [    
