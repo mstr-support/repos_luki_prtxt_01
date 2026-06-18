@@ -470,9 +470,6 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
         val1_str = str(val1).strip()
         val2     = row[attr2] if (attr2 and attr2 in row.index) else None
 
-        st.write("Aktuelle Sellingpiont Menge:",len(results))
-        st.write("attr1:",attr1)
-        st.write("val1_str:",val1_str)
 
         # call selling point logic for attribute combination
         sp_text = fnct_selling_point(
