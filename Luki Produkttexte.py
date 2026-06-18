@@ -134,6 +134,9 @@ selling_point_checks = [
     {"attr1": "Schuhweite",        "attr2": None},
     {"attr1": "Non-marking Sohle", "attr2": None},
     {"attr1": "Made in Europe",    "attr2": None},
+    {"attr1": "Laufsohle",          "attr2": None},
+    {"attr1": "Absatzart",          "attr2": None},
+    {"attr1": "Verschluss",          "attr2": None}
 ]
 
 # fixed replacement for speficif values
