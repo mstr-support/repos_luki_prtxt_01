@@ -933,7 +933,7 @@ with tab2:
     #
     # LEG-259 prompt text
     #  -> is saved in the session state and can be adapted
-    with st.expander("Prompt text article variants"):
+    with st.expander("Prompt für die SEO-Textgenerierung"):
 
         # of not yet existing, take default prompt text
         if "tab2_seo_prompt_1" not in st.session_state:
@@ -946,7 +946,7 @@ with tab2:
                                                         key="tab2_prompt_input_1"
                                                     )
         
-    with st.expander("Prompt text model divercification"):
+    with st.expander("Prompt für die Diversifizierung der Texte für die unterschiedlichen Varianten pro Modell"):
 
         # of not yet existing, take default prompt text
         if "tab2_seo_prompt_2" not in st.session_state:
@@ -1052,12 +1052,12 @@ with tab2:
                         temperature=0.5
                     )
 
-                    st.write(seo_response)
+                    #st.write(seo_response)
 
                     seo_text = seo_response.choices[0].message.content
                     seo_text = fnct_ptxt(seo_text)
 
-                    st.write(seo_text)                    
+                    #st.write(seo_text)                    
 
                     tab2_output_rows.append({
                         "Modell":           tab2_df_org_data.loc[idx, "Modell"],
@@ -1065,8 +1065,9 @@ with tab2:
                         "Marke":            tab2_df_org_data.loc[idx, "Marke"],        # neu
                         "Gruppe":           tab2_df_org_data.loc[idx, "Gruppe"],       # neu
                         "Produkttyp":       tab2_df_org_data.loc[idx, "Produkttyp"],   # neu
-                        "Produkttext": seo_text,
-                        "Response_ID": seo_response.id,
+                        "Produkttext":      original_text,
+                        "Produkttext_SEO":  seo_text,
+                        "Response_ID":      seo_response.id,
                         "Created_UTC": datetime.fromtimestamp(seo_response.created).strftime("%d.%m.%Y %H:%M:%S"),
                         "Model": seo_response.model,
                         "Prompt_Tokens": seo_response.usage.prompt_tokens,
@@ -1118,7 +1119,7 @@ with tab2:
                         temperature=0.7
                     )
 
-                    st.write(div_response)
+                    #st.write(div_response)
 
                     # the response contains a JSON with a list of all
                     # the adapted Produkttexte                    
@@ -1134,7 +1135,7 @@ with tab2:
                         if key in parsed:
 
                             # write back new Produkttext
-                            tab2_df_output_data.loc[idx, "Produkttext"] = fnct_ptxt(parsed[key])
+                            tab2_df_output_data.loc[idx, "Produkttext_SEO"] = fnct_ptxt(parsed[key])
 
                             # prompt tokens get devided by the number of Artikelvariante per Modell
                             tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
