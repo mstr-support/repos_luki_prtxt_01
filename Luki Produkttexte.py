@@ -447,7 +447,6 @@ def fnct_selling_point(
 def fnct_selling_points(row: pd.Series, marke: str) -> dict:
     results = []
 
-    st.write(row)
 
     # loop over config
     for check in selling_point_checks:
