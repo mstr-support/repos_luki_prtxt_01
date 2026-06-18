@@ -125,7 +125,7 @@ tab2_required_columns = [
 selling_point_checks = [
     {"attr1": "Barfußschuh",       "attr2": None},
     {"attr1": "Zertifikate",       "attr2": None},
-    {"attr1": "Leuchtendes Motiv", "attr2": None},
+    {"attr1": "Leuchtendes Motiv",  "attr2": None},
     {"attr1": "Wasserbeständig",   "attr2": None},
     {"attr1": "Nachhaltigkeit",    "attr2": None},
     {"attr1": "Membrane",          "attr2": None},
