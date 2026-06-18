@@ -485,10 +485,11 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
 
         if sp_text and sp_text != val1_str:
 
-            st.write("Aktuelle Sellingpiont Menge:",len(results))
-            st.write("attr1:",attr1)
-            st.write("val1_str:",val1_str)
-            st.write("sp_text:",sp_text)
+            # Testausgabe
+            #st.write("Aktuelle Sellingpiont Menge:",len(results))
+            #st.write("attr1:",attr1)
+            #st.write("val1_str:",val1_str)
+            #st.write("sp_text:",sp_text)
 
             results.append(sp_text)
  
