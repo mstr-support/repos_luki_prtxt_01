@@ -32,6 +32,9 @@ st.set_page_config(
 #gpts_modl = "gpt-5.4-mini"
 gpts_modl = "gpt-5.4"
 
+#
+# Prompt definitions
+
 # input prompt -> can be dynamic in the future with a text box
 inpt_prmt = (
 	"Du bist ein erfahrener Werbetexter mit Spezialisierung auf Schuhe."
@@ -107,8 +110,7 @@ tab1_required_columns = [
 # requires columns for SEO Optimization have to be the same
 # as the output file of product text generation
 tab2_required_columns = [    
-    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
-    "Artikelvariante", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial",
+    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",    
     "Produkttext", "Response_ID", "Created_UTC", "Model",
     "Prompt_Tokens", "Completion_Tokens",
     # Leg-280
@@ -139,6 +141,7 @@ selling_point_checks = [
     {"attr1": "Verschluss",          "attr2": None}
 ]
 
+#
 # fixed replacement for speficif values
 
 #Funktion für Geschlecht
@@ -496,6 +499,12 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
     return {f"Selling Point {i+1}": results[i] for i in range(5)}
 
 
+#
+# functions to load 
+
+@st.cache_data(ttl=86400)  # TTL so that the data is forced to reload, when data is updated daily
+def load_artv_data():
+    return pd.read_excel(st.secrets["AZURE_BLOB_URL_ARTV"], engine="openpyxl")
 
 
 
@@ -645,6 +654,7 @@ with tab1:
 
 
 
+
         st.dataframe(tab1_df_org_data)
 
         # check if generation was already done before and
@@ -652,9 +662,6 @@ with tab1:
         if st.session_state.tab1_generation_done == True:
             tab1_df_output_data = st.session_state.tab1_df_output_data
         
-
-        tab1_add_seo_columns = st.checkbox("SEO-Spalten (Artikelvariante, Farbcode, Farbe_Suche_1, MatArt_Obermaterial) in Ausgabe einfügen")        
-
 
         # button to start generation of produkttexte
         if st.button("Produkttexte generieren"):
@@ -779,12 +786,7 @@ with tab1:
                         "Saison": saison,
                         "Marke": marke, 
                         "Gruppe": gruppe,
-                        "Produkttyp": produkttyp,
-                        # LEG-259
-                        "Artikelvariante":"",
-                        "Farbcode": "",
-                        "Farbe_Suche_1": "",
-                        "MatArt_Obermaterial": "",
+                        "Produkttyp": produkttyp,                        
                         ##
                         "Produkttext": text_output,
                         ## Leg-260
@@ -804,27 +806,15 @@ with tab1:
                     print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
                     rows_indx += 1
 
-            # transform list to dataframe for Excel export
-            if tab1_add_seo_columns:
-
-                tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
-                    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
-                    "Artikelvariante", "Farbcode", "Farbe_Suche_1", "MatArt_Obermaterial",
-                    "Selling Point 1", "Selling Point 2", "Selling Point 3",
-                    "Selling Point 4", "Selling Point 5",
-                    "Produkttext", "Response_ID", "Created_UTC", "Model",
-                    "Prompt_Tokens", "Completion_Tokens"
-                ])
-
-            else:
-
-                tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
-                    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",                    
-                    "Selling Point 1", "Selling Point 2", "Selling Point 3",
-                    "Selling Point 4", "Selling Point 5",
-                    "Produkttext", "Response_ID", "Created_UTC", "Model",
-                    "Prompt_Tokens", "Completion_Tokens"
-                ])
+            
+            tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
+                "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",                    
+                "Selling Point 1", "Selling Point 2", "Selling Point 3",
+                "Selling Point 4", "Selling Point 5",
+                "Produkttext", "Response_ID", "Created_UTC", "Model",
+                "Prompt_Tokens", "Completion_Tokens"
+            ])
+            
 
 
             # review the gernerated product 
@@ -1006,10 +996,14 @@ with tab2:
     else:
         st.info("Bitte eine Datei hochladen.")
 
+    
+    # LEG-262
+    # Load automatically Excel file with 
+
 
     if tab2_df_org_data is not None:
-        
 
+        # check required columns for input data
         tab2_col_error = False
         for col in tab2_required_columns:
             if col not in tab2_df_org_data.columns:
@@ -1019,11 +1013,56 @@ with tab2:
         if len(tab2_df_org_data) == 0:
             st.error("Die hochgeladene Datei enthält keine Datensätze.")
             tab2_col_error = True
+      
+
+
+        # LEG-262
+        # Excel file with Artikelvarianten is loaded from Blob and 
+        try:
+            tab2_df_artv = load_artv_data()
+        except Exception as e:
+            st.error(f"Fehler beim Laden der Variantendaten aus dem Blob: {e}")
+            tab2_col_error = True
+
+        # check required columns for Artikelvarianten
+        if "Artikelmodell" not in tab2_df_artv.columns:
+            st.error("Spalte 'Artikelmodell' fehlt in den Variantendaten aus dem Blob.")
+            tab2_col_error = True
+
+        tab2_df_org_data = tab2_df_org_data.merge(
+            tab2_df_artv,
+            how="inner",
+            left_on="Modell",
+            right_on="Artikelmodell"
+        )
+
+        if len(tab2_df_org_data) == 0:
+            st.error("Keine passenden Variantendaten gefunden (Join über Modell/Artikelmodell leer).")
+            st.stop()
+
+        st.info(f"{len(tab2_df_org_data)} Artikelvarianten nach Verknüpfung mit Blob-Daten.")
+        
+
+        st.dataframe(tab2_df_artv)
+
+
+
+        # join Artikelvarianten to input data
+        tab2_df_org_data = tab2_df_org_data.merge(
+            tab2_df_artv,
+            how="inner",
+            left_on="Modell",
+            right_on="Artikelmodell"
+        )
+        
+        
 
         if tab2_col_error:
             st.stop()
 
+        # show data frame
         st.dataframe(tab2_df_org_data)
+
 
         if st.session_state.tab2_generation_done:
             tab2_df_output_data = st.session_state.tab2_df_output_data
