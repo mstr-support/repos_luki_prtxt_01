@@ -1025,19 +1025,24 @@ with tab2:
             tab2_col_error = True
 
         # check required columns for Artikelvarianten
-        if "Artikelmodell" not in tab2_df_artv.columns:
+        if "Artikelvariante" not in tab2_df_artv.columns:
             st.error("Spalte 'Artikelmodell' fehlt in den Variantendaten aus dem Blob.")
             tab2_col_error = True
+
+        # Modell-Teil aus der Artikelvariante ableiten (alles vor dem letzten "-")
+        tab2_df_artv["Artikelvariante"] = tab2_df_artv["Artikelvariante"].astype(str).str.strip()
+        tab2_df_artv["Modell_Join"] = tab2_df_artv["Artikelvariante"].str.rsplit("-", n=1).str[0]
+
 
         tab2_df_org_data = tab2_df_org_data.merge(
             tab2_df_artv,
             how="inner",
             left_on="Modell",
-            right_on="Artikelmodell"
+            right_on="Modell_Join"
         )
 
         if len(tab2_df_org_data) == 0:
-            st.error("Keine passenden Variantendaten gefunden (Join über Modell/Artikelmodell leer).")
+            st.error("Keine passenden Variantendaten gefunden (Join über Modell/Artikelvariante leer).")
             st.stop()
 
         st.info(f"{len(tab2_df_org_data)} Artikelvarianten nach Verknüpfung mit Blob-Daten.")
