@@ -1079,7 +1079,7 @@ with tab2:
                 for idx in tab2_df_org_data.index:
                     original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
                     # add with LEG-259
-                    farbe = str(tab2_df_org_data.loc[idx, "Farbe_Suche_1"]).strip()
+                    farbe = str(tab2_df_org_data.loc[idx, "Farbe_Suche1"]).strip()
                     matart = str(tab2_df_org_data.loc[idx, "MatArt_Obermaterial"]).strip()
 
                     variant_input = (
