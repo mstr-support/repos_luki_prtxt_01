@@ -1029,7 +1029,9 @@ with tab2:
             st.error("Spalte 'Artikelmodell' fehlt in den Variantendaten aus dem Blob.")
             tab2_col_error = True
 
-        # Modell-Teil aus der Artikelvariante ableiten (alles vor dem letzten "-")
+        # get join criteria:
+        # sample for model - 
+        # sample for Artikelvarioante - 
         tab2_df_artv["Artikelvariante"] = tab2_df_artv["Artikelvariante"].astype(str).str.strip()
         tab2_df_artv["Modell_Join"] = tab2_df_artv["Artikelvariante"].str.rsplit("-", n=1).str[0]
 
@@ -1050,17 +1052,6 @@ with tab2:
 
         st.dataframe(tab2_df_artv)
 
-
-
-        # join Artikelvarianten to input data
-        tab2_df_org_data = tab2_df_org_data.merge(
-            tab2_df_artv,
-            how="inner",
-            left_on="Modell",
-            right_on="Artikelmodell"
-        )
-        
-        
 
         if tab2_col_error:
             st.stop()
