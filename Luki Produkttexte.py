@@ -1049,8 +1049,8 @@ with tab2:
 
         st.info(f"{len(tab2_df_org_data)} Artikelvarianten nach Verknüpfung mit Blob-Daten.")
         
-
-        st.dataframe(tab2_df_artv)
+        # output for test
+        #st.dataframe(tab2_df_artv)
 
 
         if tab2_col_error:
