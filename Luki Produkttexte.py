@@ -384,6 +384,13 @@ def fnct_selling_point(
     attribut2: str = None,
     wert2: str = None
 ):
+    
+    # Testausgabe    
+    #st.write("attr1:",attribut1)
+    #st.write("val1_str:",wert1)
+    #st.write("attr2:",attribut2)
+    #st.write("val2_str:",wert2)
+    
 
     # load Selling point Excel file if not yet done    
     if "tab3_df" not in st.session_state:
@@ -481,14 +488,6 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
             attribut2=attr2,
             wert2=val2
         )
-
-        # Testausgabe
-        st.write("Aktuelle Sellingpiont Menge:",len(results))
-        st.write("attr1:",attr1)
-        st.write("val1_str:",val1_str)
-        st.write("attr2:",attr2)
-        st.write("val2_str:",val2_str)
-        st.write("sp_text:",sp_text)
 
 
         # check if selling point text 
