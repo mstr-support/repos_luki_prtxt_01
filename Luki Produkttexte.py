@@ -486,6 +486,8 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
         st.write("Aktuelle Sellingpiont Menge:",len(results))
         st.write("attr1:",attr1)
         st.write("val1_str:",val1_str)
+        st.write("attr2:",attr1)
+        st.write("val2_str:",val1_str)
         st.write("sp_text:",sp_text)
 
 
