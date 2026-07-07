@@ -471,6 +471,7 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
 
         val1_str = str(val1).strip()
         val2     = row[attr2] if (attr2 and attr2 in row.index) else None
+        val2_str = str(val2).strip()
 
 
         # call selling point logic for attribute combination
@@ -482,6 +483,7 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
             wert2=val2
         )
 
+        # check if selling point text 
         if sp_text and sp_text != val1_str:
 
             # Testausgabe
@@ -490,7 +492,20 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
             #st.write("val1_str:",val1_str)
             #st.write("sp_text:",sp_text)
 
+            # LEG-260
+            # Wenn Wechselfußbett = "Ja", dann Nachhaltigkeits-Selling-Points,
+            # die die Decksohle erwähnen, ignorieren
+            wfb = row["Wechselfußbett"] if "Wechselfußbett" in row.index else None
+            if (
+                attr1 == "Nachhaltigkeit"
+                and pd.notna(wfb)
+                and str(wfb).strip().lower() == "ja"
+                and "decksohle" in sp_text.lower()
+            ):
+                continue
+
             results.append(sp_text)
+                
  
     while len(results) < 5:
         # at empty text, if no 5 selling points exist
@@ -1029,6 +1044,9 @@ with tab2:
             st.error("Spalte 'Artikelmodell' fehlt in den Variantendaten aus dem Blob.")
             tab2_col_error = True
 
+        if tab2_col_error:
+            st.stop()
+
         # get join criteria:
         # sample for model - 
         # sample for Artikelvarioante - 
@@ -1052,9 +1070,7 @@ with tab2:
         # output for test
         #st.dataframe(tab2_df_artv)
 
-
-        if tab2_col_error:
-            st.stop()
+       
 
         # show data frame
         st.dataframe(tab2_df_org_data)
