@@ -52,6 +52,23 @@ inpt_prmt = (
     "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben."
 )
 
+# input prompt for kids (Superfit)
+inpt_prmt_kids = (
+	"Du bist ein erfahrener Werbetexter mit Spezialisierung auf Kinderschuhe."
+    "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
+    "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
+	"Der erste Satz muss Produktname und Produkttyp enthalten."
+    "Produktname + Produkttyp immer mit Artikel (zB Der Sneaker XXX, die Hausschuhe YYY)."
+    "Füge manchmal auch das Geschlecht zum Produkttyp, zB Jungensandale, Mädchenschuh."
+	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
+    "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
+	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
+    "Achte auf eine natürliche, menschlich klingende Sprache die für die Zielgruppe Kinder optimiert ist."
+    "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
+    "Halte die Textlänge zwischen 500-550 Zeichen, erwähne nie das Wort Leisten."
+    "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben."
+)
+
 # Prompt for product text review
 inpt_prmt_review = (
     "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler."
@@ -490,8 +507,9 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
         )
 
 
-        # check if selling point text 
-        if sp_text and sp_text != val1_str:            
+        # check if selling point text exists
+        # if sp_text and sp_text != val1_str: -> was changed with LEG-260           
+        if sp_text:            
 
             # LEG-260
             # Wenn Wechselfußbett = "Ja", dann Nachhaltigkeits-Selling-Points,
@@ -752,8 +770,17 @@ with tab1:
                         if pd.notna(val) and str(val).strip() != ""
                     )
 
+                    # get Marke to differ between Kids and normal shoes
+                    marke = str(tab1_df_org_data.loc[rows_indx, "Marke"]).strip().upper()
+                    
+                    # choose input prompt based on Marke
+                    if marke.startswith("SUPERFIT"):
+                        active_prompt = inpt_prmt_kids
+                    else:
+                        active_prompt = inpt_prmt
+
                     final_prompt = f"""
-                    {inpt_prmt}                
+                    {active_prompt}                
                     Attribute:
                     {inpt_vatr}
                     """
