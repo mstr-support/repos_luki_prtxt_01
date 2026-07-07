@@ -506,6 +506,12 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
             wert2=val2
         )
 
+        st.write('attr1:',attr1)
+        st.write('val1:',val1)
+        st.write('attr2:',attr2)
+        st.write('val2:',val2)
+        st.write('sp_text:',sp_text)
+
 
         # check if selling point text exists
         # if sp_text and sp_text != val1_str: -> was changed with LEG-260           
