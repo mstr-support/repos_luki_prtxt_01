@@ -105,19 +105,6 @@ inpt_prmt_seo_2 = (
     "Erfinde keine neuen Eigenschaften. "
     "Korrigiere Grammatik, Rechtschreibung und Zeichensetzung wenn notwendig. "
     "Jeder finale Text soll mindestens 550 Zeichen inklusive Leerzeichen haben. "
-    # LEG-263
-    "Jeder Prüfling enthält Angaben zu Farbe und Material seiner Artikelvariante. "
-    "Ergänze am Ende jedes Textes einen Satz, der auf weitere Farb- und Materialvarianten des Modells hinweist. "
-    "Verwende dafür ausschließlich die Farben und Materialien der jeweils ANDEREN Prüflinge, niemals die eigene. "
-    "Nenne maximal drei weitere Varianten. "
-    "Nenne das Material nur dann, wenn es vom Material der eigenen Variante abweicht. "
-    "Formuliere diesen Satz für jeden Prüfling unterschiedlich. Beispiele: "
-    "'Der TANARO 5.0 in der Farbe Offwhite aus hochwertigem Nappaleder ist außerdem in zahlreichen weiteren "
-    "Farb- und Materialvarianten erhältlich, darunter Aluminio aus Nubukleder, Tasso aus Nubukleder sowie Zebra aus Effektleder.' "
-    "'Der TANARO 5.0 überzeugt in dieser Variante in der Farbe Offwhite aus Nappaleder und ist zusätzlich in vielen "
-    "weiteren Farben und Materialien erhältlich, darunter Aluminio und Tasso aus Nubukleder sowie Zebra aus Effektleder.' "
-    "Gibt es nur einen einzigen Prüfling, füge keinen solchen Satz hinzu. "
-    #
     "Gib ausschließlich die überarbeiteten Texte als JSON zurück. Keine Analyse. Keine Erklärungen. "
     "Format: {\"1\": \"text prüfling 1\", \"2\": \"text prüfling 2\", ...}"
 )
@@ -1207,7 +1194,12 @@ with tab2:
                     indices  = gruppe.index.tolist()                   
 
                     # get all produkttexte in a list
-                    # LEG-263 - add Farbe, Suche, Material for aditional variant sentence                    
+                    prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]                                  
+                                    for i, idx in enumerate(indices[0:])}                   
+                    
+
+                    # join single artikelvariante produkttexte to one text for the prompt
+                    # LEG-263 - pass Farbe, Material for text of other variants
                     pruefling_block = "\n\n".join(
                         f"Prüfling {str(i+1)}:\n"
                         f"Farbe: {str(tab2_df_output_data.loc[idx, 'Farbe_Suche1']).strip()}\n"
@@ -1215,12 +1207,6 @@ with tab2:
                         f"Text: {tab2_df_output_data.loc[idx, 'Produkttext']}"
                         for i, idx in enumerate(indices[0:])
                     )
-
-                    # join single artikelvariante produkttexte to one text for the prompt
-                    pruefling_block = "\n\n".join(
-                        f"Prüfling {k}:\n{v}" for k, v in prueflinge.items()
-                    )
-                
 
                     # create prompt
                     div_prompt = (
