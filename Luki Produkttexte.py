@@ -105,6 +105,19 @@ inpt_prmt_seo_2 = (
     "Erfinde keine neuen Eigenschaften. "
     "Korrigiere Grammatik, Rechtschreibung und Zeichensetzung wenn notwendig. "
     "Jeder finale Text soll mindestens 550 Zeichen inklusive Leerzeichen haben. "
+    # LEG-263
+    "Jeder Prüfling enthält Angaben zu Farbe und Material seiner Artikelvariante. "
+    "Ergänze am Ende jedes Textes einen Satz, der auf weitere Farb- und Materialvarianten des Modells hinweist. "
+    "Verwende dafür ausschließlich die Farben und Materialien der jeweils ANDEREN Prüflinge, niemals die eigene. "
+    "Nenne maximal drei weitere Varianten. "
+    "Nenne das Material nur dann, wenn es vom Material der eigenen Variante abweicht. "
+    "Formuliere diesen Satz für jeden Prüfling unterschiedlich. Beispiele: "
+    "'Der TANARO 5.0 in der Farbe Offwhite aus hochwertigem Nappaleder ist außerdem in zahlreichen weiteren "
+    "Farb- und Materialvarianten erhältlich, darunter Aluminio aus Nubukleder, Tasso aus Nubukleder sowie Zebra aus Effektleder.' "
+    "'Der TANARO 5.0 überzeugt in dieser Variante in der Farbe Offwhite aus Nappaleder und ist zusätzlich in vielen "
+    "weiteren Farben und Materialien erhältlich, darunter Aluminio und Tasso aus Nubukleder sowie Zebra aus Effektleder.' "
+    "Gibt es nur einen einzigen Prüfling, füge keinen solchen Satz hinzu. "
+    #
     "Gib ausschließlich die überarbeiteten Texte als JSON zurück. Keine Analyse. Keine Erklärungen. "
     "Format: {\"1\": \"text prüfling 1\", \"2\": \"text prüfling 2\", ...}"
 )
@@ -1160,6 +1173,11 @@ with tab2:
                         "Marke":            tab2_df_org_data.loc[idx, "Marke"],        # neu
                         "Gruppe":           tab2_df_org_data.loc[idx, "Gruppe"],       # neu
                         "Produkttyp":       tab2_df_org_data.loc[idx, "Produkttyp"],   # neu
+                        #LEG-263: provide Artikelvariante, Farbe and Material, so that ChatGPT
+                        # can add a sentence, that there are other variants of the article
+                        "Artikelvariante":     tab2_df_org_data.loc[idx, "Artikelvariante"],
+                        "Farbe_Suche1":        tab2_df_org_data.loc[idx, "Farbe_Suche1"],
+                        "MatArt_Obermaterial": tab2_df_org_data.loc[idx, "MatArt_Obermaterial"],
                         "Produkttext":      original_text,
                         "Produkttext_SEO":  seo_text,
                         "Response_ID":      seo_response.id,
@@ -1189,9 +1207,14 @@ with tab2:
                     indices  = gruppe.index.tolist()                   
 
                     # get all produkttexte in a list
-                    prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]
-                                    for i, idx in enumerate(indices[0:])}                   
-                    
+                    # LEG-263 - add Farbe, Suche, Material for aditional variant sentence                    
+                    pruefling_block = "\n\n".join(
+                        f"Prüfling {str(i+1)}:\n"
+                        f"Farbe: {str(tab2_df_output_data.loc[idx, 'Farbe_Suche1']).strip()}\n"
+                        f"Material: {str(tab2_df_output_data.loc[idx, 'MatArt_Obermaterial']).strip()}\n"
+                        f"Text: {tab2_df_output_data.loc[idx, 'Produkttext']}"
+                        for i, idx in enumerate(indices[0:])
+                    )
 
                     # join single artikelvariante produkttexte to one text for the prompt
                     pruefling_block = "\n\n".join(
@@ -1204,6 +1227,8 @@ with tab2:
                         f"{st.session_state.tab2_seo_prompt_2}\n\n"                        
                         f"{pruefling_block}"
                     )
+
+                    st.write(div_prompt)
 
                     div_response = client.chat.completions.create(
                         model=gpts_modl,
