@@ -515,7 +515,8 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
 
         # check if selling point text exists
         # if sp_text and sp_text != val1_str: -> was changed with LEG-260           
-        if sp_text:            
+        # LEG-260 'ja' and 'nein' explizit filtered
+        if sp_text and sp_text != 'Ja' and sp_text != 'Nein':            
 
             # LEG-260
             # Wenn Wechselfußbett = "Ja", dann Nachhaltigkeits-Selling-Points,
