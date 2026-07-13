@@ -434,9 +434,7 @@ def fnct_selling_point(
         df_sp["Marke"].astype(str).str.strip().str.upper().isin(["ALLE", marke_str])
     ]
 
-    st.dataframe(df_sp)
 
-    
     #
     # differ between different lookups
     # 1 -> map only Attribute 1
@@ -467,7 +465,6 @@ def fnct_selling_point(
             (df_sp["Wert 2"].astype(str).str.strip().str.lower() == wert2_str.lower())
         ]
 
-    st.dataframe(df_sp_filtered)
 
     # return first selling point text of filtered dataframe (if there's data)
     if len(df_sp_filtered) > 0:
@@ -512,13 +509,7 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
             wert2=val2
         )
 
-        st.write('attr1:',attr1)
-        st.write('val1:',val1)
-        st.write('attr2:',attr2)
-        st.write('val2:',val2)
-        st.write('sp_text:',sp_text)
-
-
+     
         # check if selling point text exists
         # if sp_text and sp_text != val1_str: -> was changed with LEG-260           
         # LEG-260 'ja' and 'nein' explizit filtered
