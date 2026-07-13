@@ -789,7 +789,7 @@ with tab1:
                     {inpt_vatr}
                     """
 
-                    st.write(final_prompt)
+                    #st.write(final_prompt)
 
                     response = client.chat.completions.create(
                         model=gpts_modl,
