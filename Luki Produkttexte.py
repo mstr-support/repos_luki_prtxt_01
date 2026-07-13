@@ -425,8 +425,7 @@ def fnct_selling_point(
 
     # filter selling point data only for relevant rows
     df_sp = st.session_state.tab3_df[st.session_state.tab3_df["Relevant"].astype(str).str.strip().str.upper() == "J"].copy()
-
-    st.dataframe(df_sp)
+   
 
     # filter for Marke
     marke_str = str(marke).strip().upper()
@@ -435,7 +434,9 @@ def fnct_selling_point(
         df_sp["Marke"].astype(str).str.strip().str.upper().isin(["ALLE", marke_str])
     ]
 
+    st.dataframe(df_sp)
 
+    
     #
     # differ between different lookups
     # 1 -> map only Attribute 1
@@ -452,6 +453,7 @@ def fnct_selling_point(
             (df_sp["Wert 1"].astype(str).str.strip().str.lower() == wert1_str.lower())
         ]       
 
+
     else:
 
         wert1_str = str(wert1).strip()
@@ -465,6 +467,7 @@ def fnct_selling_point(
             (df_sp["Wert 2"].astype(str).str.strip().str.lower() == wert2_str.lower())
         ]
 
+    st.dataframe(df_sp_filtered)
 
     # return first selling point text of filtered dataframe (if there's data)
     if len(df_sp_filtered) > 0:
