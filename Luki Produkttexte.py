@@ -7,6 +7,7 @@ import pandas as pd
 from io import BytesIO
 import re
 import json
+import time
 
 # for selling point config
 from azure.storage.blob import BlobClient
@@ -135,7 +136,7 @@ tab1_required_columns = [
     "Schuhweite", "Membrane", "Laufsohle",
     "Absatzart", "Form Schuhspitze", "Nachhaltigkeit",
     "Wechselfußbett", "Decksohle", "Futtermaterial", "Futter Detail", "Zertifikate",
-    "Besonderheiten"
+    "Besonderheiten",
     ]
 
 
@@ -158,15 +159,11 @@ tab2_required_columns = [
 
 selling_point_checks = [
     {"attr1": "Zertifikate",       "attr2": None},
-    {"attr1": "Leuchtendes Motiv",  "attr2": None},
-    {"attr1": "Wasserbeständig",   "attr2": None},
     {"attr1": "Nachhaltigkeit",    "attr2": None},
     {"attr1": "Membrane",          "attr2": None},
     {"attr1": "Wechselfußbett",    "attr2": "Decksohle"},
     {"attr1": "Futtermaterial",    "attr2": None},
     {"attr1": "Schuhweite",        "attr2": None},
-    {"attr1": "Non-marking Sohle", "attr2": None},
-    {"attr1": "Made in Europe",    "attr2": None},
     {"attr1": "Laufsohle",          "attr2": None},
     {"attr1": "Absatzart",          "attr2": None},
     {"attr1": "Verschluss",          "attr2": None}
@@ -594,6 +591,8 @@ if "tab1_df_output_data" not in st.session_state:
     st.session_state.tab1_df_output_data = None
 if "tab1_imported_file_name" not in st.session_state:
     st.session_state.tab1_imported_file_name = None
+if "tab1_timing" not in st.session_state:
+    st.session_state.tab1_timing = None
 
 
 # check session variables for SOE , whether a generation was already done
@@ -603,6 +602,8 @@ if "tab2_df_output_data" not in st.session_state:
     st.session_state.tab2_df_output_data = None
 if "tab2_imported_file_name" not in st.session_state:
     st.session_state.tab2_imported_file_name = None
+if "tab2_timing" not in st.session_state:
+    st.session_state.tab2_timing = None
 
 
 # logo on page right
@@ -723,9 +724,13 @@ with tab1:
             rows_indx = 0
             list_output_data = []
 
+            # Zeitmessung: Ergebnisse pro Schritt werden hier gesammelt
+            tab1_timing_records = []
+
             
             
             # loop
+            tab1_step1_start = time.perf_counter()
             with st.spinner("Produkttexte werden generiert...", show_time=True):
 
                 for rows_indx in tab1_df_org_data.index:
@@ -868,6 +873,15 @@ with tab1:
                     print(rows_indx, datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S"))
                     rows_indx += 1
 
+            tab1_step1_elapsed = time.perf_counter() - tab1_step1_start
+            tab1_step1_count = len(list_output_data)
+            tab1_timing_records.append({
+                "Schritt": "1. Produkttexte generieren",
+                "Anzahl": tab1_step1_count,
+                "Gesamtzeit (s)": round(tab1_step1_elapsed, 2),
+                "Ø Zeit/Element (s)": round(tab1_step1_elapsed / tab1_step1_count, 2) if tab1_step1_count else 0,
+            })
+
             
             tab1_df_output_data = pd.DataFrame(list_output_data, columns=[
                 "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",                    
@@ -880,6 +894,7 @@ with tab1:
 
 
             # review the gernerated product 
+            tab1_step2_start = time.perf_counter()
             with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
 
                 # empty lists to store information of second loop
@@ -924,6 +939,14 @@ with tab1:
 
                     
 
+            tab1_step2_elapsed = time.perf_counter() - tab1_step2_start
+            tab1_step2_count = len(reviewed_texts)
+            tab1_timing_records.append({
+                "Schritt": "2. Produkttexte nachbearbeiten",
+                "Anzahl": tab1_step2_count,
+                "Gesamtzeit (s)": round(tab1_step2_elapsed, 2),
+                "Ø Zeit/Element (s)": round(tab1_step2_elapsed / tab1_step2_count, 2) if tab1_step2_count else 0,
+            })
 
             # LEG-256 final consolidation if review round
             # only result text of review is taken
@@ -946,12 +969,22 @@ with tab1:
             # save current result in session state
             st.session_state.tab1_df_output_data = tab1_df_output_data
             st.session_state.tab1_generation_done = True
+            st.session_state.tab1_timing = tab1_timing_records
 
         
         if tab1_df_output_data is not None:
 
             # write output
             st.success("Produkttexte erfolgreich generiert.")
+
+            # Zeitmessung anzeigen
+            if st.session_state.tab1_timing:
+                st.markdown("**Zeitmessung**")
+                tab1_timing_df = pd.DataFrame(st.session_state.tab1_timing)
+                gesamt_zeit = tab1_timing_df["Gesamtzeit (s)"].sum()
+                st.dataframe(tab1_timing_df, hide_index=True)
+                st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
+
             st.dataframe(tab1_df_output_data.drop('Produkttext',axis=1))
 
             # prepare Excel Download
@@ -1133,11 +1166,15 @@ with tab2:
             client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
             tab2_output_rows = []
 
+            # Zeitmessung: Ergebnisse pro Schritt werden hier gesammelt
+            tab2_timing_records = []
+
 
             #
             # step 1: generate SEO text per Artikelvariante
             #
 
+            tab2_step1_start = time.perf_counter()
             with st.spinner("SEO-Optimierung läuft pro Artikelvariante...", show_time=True):
                 for idx in tab2_df_org_data.index:
                     original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
@@ -1189,6 +1226,15 @@ with tab2:
                         "Completion_Tokens": seo_response.usage.completion_tokens
                     })
 
+            tab2_step1_elapsed = time.perf_counter() - tab2_step1_start
+            tab2_step1_count = len(tab2_output_rows)
+            tab2_timing_records.append({
+                "Schritt": "1. SEO-Text pro Artikelvariante",
+                "Anzahl": tab2_step1_count,
+                "Gesamtzeit (s)": round(tab2_step1_elapsed, 2),
+                "Ø Zeit/Element (s)": round(tab2_step1_elapsed / tab2_step1_count, 2) if tab2_step1_count else 0,
+            })
+
             tab2_df_output_data = pd.DataFrame(tab2_output_rows)
 
 
@@ -1196,6 +1242,8 @@ with tab2:
             # step 2: create more divers model text
             #
 
+            tab2_step2_start = time.perf_counter()
+            tab2_step2_count = 0
             with st.spinner("SEO Optimieriung läuft pro Modell", show_time=True):
 
                 # loop over model combinations
@@ -1205,6 +1253,8 @@ with tab2:
                     # 2 article variants per model
                     if len(gruppe) < 2:
                         continue
+
+                    tab2_step2_count += 1
 
                     indices  = gruppe.index.tolist()                   
 
@@ -1266,12 +1316,30 @@ with tab2:
                             tab2_df_output_data.loc[idx, "Länge()"] = len(parsed[key])
                     
 
+            tab2_step2_elapsed = time.perf_counter() - tab2_step2_start
+            tab2_timing_records.append({
+                "Schritt": "2. Diversifizierung pro Modell",
+                "Anzahl": tab2_step2_count,
+                "Gesamtzeit (s)": round(tab2_step2_elapsed, 2),
+                "Ø Zeit/Element (s)": round(tab2_step2_elapsed / tab2_step2_count, 2) if tab2_step2_count else 0,
+            })
+
             st.session_state.tab2_df_output_data = tab2_df_output_data
+            st.session_state.tab2_timing = tab2_timing_records
             st.session_state.seo_done = True
 
 
         if tab2_df_output_data is not None:
             st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
+
+            # Zeitmessung anzeigen
+            if st.session_state.tab2_timing:
+                st.markdown("**Zeitmessung**")
+                tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
+                gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
+                st.dataframe(tab2_timing_df, hide_index=True)
+                st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
+
             st.dataframe(tab2_df_output_data)
 
             buffer = BytesIO()
