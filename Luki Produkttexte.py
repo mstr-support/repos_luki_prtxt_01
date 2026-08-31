@@ -45,6 +45,7 @@ inpt_prmt = (
     "Füge manchmal auch das Geschlecht zum Produkttyp, zB Herrensneaker, Damenschuh."
 	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
     "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
+    "Wenn das Attribut Besonderheiten befüllt ist, erwähne dieses Feature ebenfalls im Produkttext."
 	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
     "Achte auf eine natürliche, menschlich klingende Sprache."
     "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
@@ -62,6 +63,7 @@ inpt_prmt_kids = (
     "Füge manchmal auch das Geschlecht zum Produkttyp, zB Jungensandale, Mädchenschuh."
 	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
     "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
+    "Wenn das Attribut Besonderheiten befüllt ist, erwähne dieses Feature ebenfalls im Produkttext."
 	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
     "Achte auf eine natürliche, menschlich klingende Sprache die für die Zielgruppe Kinder optimiert ist."
     "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
@@ -131,9 +133,9 @@ tab1_required_columns = [
     "Produkttext", 
     "Geschlecht", "Produkttyp OS", "Verschluss",
     "Schuhweite", "Membrane", "Laufsohle",
-    "Absatzart", "Form Schuhspitze", "Nachhaltigkeit", "Barfussschuh",
+    "Absatzart", "Form Schuhspitze", "Nachhaltigkeit",
     "Wechselfußbett", "Decksohle", "Futtermaterial", "Futter Detail", "Zertifikate",
-    "Leuchtendes Motiv", "Non-marking Sohle", "Wasserbeständig", "Made in Europe",
+    "Besonderheiten"
     ]
 
 
@@ -155,7 +157,6 @@ tab2_required_columns = [
 #
 
 selling_point_checks = [
-    {"attr1": "Barfußschuh",       "attr2": None},
     {"attr1": "Zertifikate",       "attr2": None},
     {"attr1": "Leuchtendes Motiv",  "attr2": None},
     {"attr1": "Wasserbeständig",   "attr2": None},
@@ -749,7 +750,8 @@ with tab1:
                             "Membrane": tab1_df_org_data.loc[rows_indx, "Membrane"],
                             "Futtermaterial": tab1_df_org_data.loc[rows_indx, "Futtermaterial"],                        
                             "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
-                            "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"])
+                            "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"]),
+                            "Besonderheiten": tab1_df_org_data.loc[rows_indx, "Besonderheiten"]
                             
                             # Logic from Leg-258 zurückgebaut - muss raus, wenn das so passt
                             # info aus selling point config lookup wird nicht mehr in die Spalte
