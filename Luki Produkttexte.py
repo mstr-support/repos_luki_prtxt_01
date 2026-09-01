@@ -1241,6 +1241,13 @@ with tab2:
                 "Ø Zeit/Element (s)": round(tab2_step1_elapsed / tab2_step1_count, 2) if tab2_step1_count else 0,
             })
 
+            # Zeitmessung anzeigen
+            st.markdown("**Zeitmessung**")
+            tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
+            gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
+            st.dataframe(tab2_timing_df, hide_index=True)
+            st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunde
+
             tab2_df_output_data = pd.DataFrame(tab2_output_rows)
 
 
@@ -1369,12 +1376,11 @@ with tab2:
 
 
         # Zeitmessung anzeigen
-        if st.session_state.tab2_timing:
-            st.markdown("**Zeitmessung**")
-            tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
-            gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
-            st.dataframe(tab2_timing_df, hide_index=True)
-            st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
+        st.markdown("**Zeitmessung**")
+        tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
+        gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
+        st.dataframe(tab2_timing_df, hide_index=True)
+        st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
 
 ####
 # 
