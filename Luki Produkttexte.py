@@ -640,7 +640,7 @@ with tab1:
                 
 
     # upoad butte for Excel file
-    tab1_uploaded_file = st.file_uploader("Excel Datei mit Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
+    tab1_uploaded_file = st.file_uploader("Hier IPIM-Datenfeed uploaden. Datei muss auf Modellebene sein", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
 
     # empty data frame for data
     tab1_df_org_data = None
@@ -690,11 +690,17 @@ with tab1:
         # check for errors
         col_error = False
 
+        # Check for required columns
         for col in tab1_required_columns:
             if col not in tab1_df_org_data.columns:
                 st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
                 col_error = True
 
+        # check for duplicate Modellnr entries
+        if "Modellnr" in tab1_df_org_data.columns:
+            if tab1_df_org_data["Modellnr"].duplicated().any():
+                st.error("Modelle nicht eindeutig, bitte Datei prüfen")
+                col_error = True
 
         # check if still data in dataframe after filterung for empty Produkttexte
         if len(tab1_df_org_data) == 0:
