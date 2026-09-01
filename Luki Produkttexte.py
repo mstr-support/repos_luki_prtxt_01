@@ -1364,6 +1364,17 @@ with tab2:
                 key="seo_download_button"
             )
 
+        else:
+            st.error("SEO-optimierte Produkttexte nicht erfolgreich.")
+
+
+        # Zeitmessung anzeigen
+        if st.session_state.tab2_timing:
+            st.markdown("**Zeitmessung**")
+            tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
+            gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
+            st.dataframe(tab2_timing_df, hide_index=True)
+            st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
 
 ####
 # 
