@@ -1246,7 +1246,7 @@ with tab2:
             tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
             gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
             st.dataframe(tab2_timing_df, hide_index=True)
-            st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunde
+            st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunde")
 
             tab2_df_output_data = pd.DataFrame(tab2_output_rows)
 
