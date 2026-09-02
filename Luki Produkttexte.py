@@ -1415,6 +1415,7 @@ with tab3:
             st.error(f"Fehler beim Laden der Datei: {e}")
             st.stop()
 
+
     # Button to manually reload the file
     if st.button("🔄 Neu laden", key="tab3_reload"):
         try:
