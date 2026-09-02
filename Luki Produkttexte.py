@@ -17,6 +17,7 @@ from azure.storage.blob import BlobClient
 # add helper functions if needed
 
 
+
 st.set_page_config(
          layout="wide",
          page_title="[LUKI] Produkttexte",
@@ -690,17 +691,18 @@ with tab1:
         # check for errors
         col_error = False
 
-        # Check for required columns
         for col in tab1_required_columns:
             if col not in tab1_df_org_data.columns:
                 st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
                 col_error = True
+
 
         # check for duplicate Modellnr entries
         if "Modellnr" in tab1_df_org_data.columns:
             if tab1_df_org_data["Modellnr"].duplicated().any():
                 st.error("Modelle nicht eindeutig, bitte Datei prüfen")
                 col_error = True
+
 
         # check if still data in dataframe after filterung for empty Produkttexte
         if len(tab1_df_org_data) == 0:
@@ -737,9 +739,13 @@ with tab1:
             
             # loop
             tab1_step1_start = time.perf_counter()
+            tab1_step1_total = len(tab1_df_org_data.index)
+            tab1_step1_progress = st.empty()
             with st.spinner("Produkttexte werden generiert...", show_time=True):
 
-                for rows_indx in tab1_df_org_data.index:
+                for tab1_step1_i, rows_indx in enumerate(tab1_df_org_data.index, start=1):
+
+                    tab1_step1_progress.text(f"Produkttexte generieren: {tab1_step1_i} von {tab1_step1_total}")
                             
                     #st.write(rows_indx)
 
@@ -901,6 +907,8 @@ with tab1:
 
             # review the gernerated product 
             tab1_step2_start = time.perf_counter()
+            tab1_step2_total = len(tab1_df_output_data.index)
+            tab1_step2_progress = st.empty()
             with st.spinner("Produkttexte werden nachbearbeitet...", show_time=True):
 
                 # empty lists to store information of second loop
@@ -912,7 +920,10 @@ with tab1:
                 review_completion_tokens = []
 
                 # loop over every generated row
-                for idx in tab1_df_output_data.index:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                for tab1_step2_i, idx in enumerate(tab1_df_output_data.index, start=1):
+
+                    tab1_step2_progress.text(f"Produkttexte nachbearbeiten: {tab1_step2_i} von {tab1_step2_total}")
+
                     original_text = tab1_df_output_data.loc[idx, "Produkttext"]
 
                     review_prompt = f"""
@@ -985,11 +996,12 @@ with tab1:
 
             # Zeitmessung anzeigen
             if st.session_state.tab1_timing:
-                st.markdown("**Zeitmessung**")
                 tab1_timing_df = pd.DataFrame(st.session_state.tab1_timing)
-                gesamt_zeit = tab1_timing_df["Gesamtzeit (s)"].sum()
-                st.dataframe(tab1_timing_df, hide_index=True)
-                st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
+                if not tab1_timing_df.empty and "Gesamtzeit (s)" in tab1_timing_df.columns:
+                    st.markdown("**Zeitmessung**")
+                    gesamt_zeit = tab1_timing_df["Gesamtzeit (s)"].sum()
+                    st.dataframe(tab1_timing_df, hide_index=True)
+                    st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
 
             st.dataframe(tab1_df_output_data.drop('Produkttext',axis=1))
 
@@ -1181,8 +1193,13 @@ with tab2:
             #
 
             tab2_step1_start = time.perf_counter()
+            tab2_step1_total = len(tab2_df_org_data.index)
+            tab2_step1_progress = st.empty()
             with st.spinner("SEO-Optimierung läuft pro Artikelvariante...", show_time=True):
-                for idx in tab2_df_org_data.index:
+                for tab2_step1_i, idx in enumerate(tab2_df_org_data.index, start=1):
+
+                    tab2_step1_progress.text(f"SEO-Text pro Artikelvariante: {tab2_step1_i} von {tab2_step1_total}")
+
                     original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
                     # add with LEG-259
                     farbe = str(tab2_df_org_data.loc[idx, "Farbe_Suche1"]).strip()
@@ -1241,15 +1258,6 @@ with tab2:
                 "Ø Zeit/Element (s)": round(tab2_step1_elapsed / tab2_step1_count, 2) if tab2_step1_count else 0,
             })
 
-            st.markdown(tab2_timing_records)
-
-            # Zeitmessung anzeigen
-            st.markdown("**Zeitmessung**")
-            tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
-            gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
-            st.dataframe(tab2_timing_df, hide_index=True)
-            st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunde")
-
             tab2_df_output_data = pd.DataFrame(tab2_output_rows)
 
 
@@ -1259,6 +1267,8 @@ with tab2:
 
             tab2_step2_start = time.perf_counter()
             tab2_step2_count = 0
+            tab2_step2_total = (tab2_df_output_data.groupby("Modell", sort=False).size() >= 2).sum()
+            tab2_step2_progress = st.empty()
             with st.spinner("SEO Optimieriung läuft pro Modell", show_time=True):
 
                 # loop over model combinations
@@ -1270,6 +1280,7 @@ with tab2:
                         continue
 
                     tab2_step2_count += 1
+                    tab2_step2_progress.text(f"Diversifizierung pro Modell: {tab2_step2_count} von {tab2_step2_total}")
 
                     indices  = gruppe.index.tolist()                   
 
@@ -1349,11 +1360,12 @@ with tab2:
 
             # Zeitmessung anzeigen
             if st.session_state.tab2_timing:
-                st.markdown("**Zeitmessung**")
                 tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
-                gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
-                st.dataframe(tab2_timing_df, hide_index=True)
-                st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
+                if not tab2_timing_df.empty and "Gesamtzeit (s)" in tab2_timing_df.columns:
+                    st.markdown("**Zeitmessung**")
+                    gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
+                    st.dataframe(tab2_timing_df, hide_index=True)
+                    st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
 
             st.dataframe(tab2_df_output_data)
 
@@ -1373,16 +1385,6 @@ with tab2:
                 key="seo_download_button"
             )
 
-        else:
-            st.error("SEO-optimierte Produkttexte nicht erfolgreich.")
-
-
-        # Zeitmessung anzeigen
-        st.markdown("**Zeitmessung**")
-        tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
-        gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
-        st.dataframe(tab2_timing_df, hide_index=True)
-        st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
 
 ####
 # 
