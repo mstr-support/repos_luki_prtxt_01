@@ -1241,6 +1241,8 @@ with tab2:
                 "Ø Zeit/Element (s)": round(tab2_step1_elapsed / tab2_step1_count, 2) if tab2_step1_count else 0,
             })
 
+            st.markdown(tab2_timing_records)
+
             # Zeitmessung anzeigen
             st.markdown("**Zeitmessung**")
             tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
