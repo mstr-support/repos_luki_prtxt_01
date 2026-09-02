@@ -17,7 +17,6 @@ from azure.storage.blob import BlobClient
 # add helper functions if needed
 
 
-
 st.set_page_config(
          layout="wide",
          page_title="[LUKI] Produkttexte",
@@ -1260,8 +1259,6 @@ with tab2:
 
             tab2_df_output_data = pd.DataFrame(tab2_output_rows)
 
-            st.dataframe(tab2_df_output_data)
-
 
             #
             # step 2: create more divers model text
@@ -1354,9 +1351,8 @@ with tab2:
 
             st.session_state.tab2_df_output_data = tab2_df_output_data
             st.session_state.tab2_timing = tab2_timing_records
-            st.session_state.seo_done = True
+            st.session_state.tab2_generation_done = True
 
-        st.dataframe(tab2_df_output_data)
 
         if tab2_df_output_data is not None:
             st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
@@ -1387,9 +1383,6 @@ with tab2:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 key="seo_download_button"
             )
-
-        else:
-            st.success("Irgendwas war falsch")
 
 
 ####
