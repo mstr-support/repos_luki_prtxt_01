@@ -1085,9 +1085,11 @@ with tab2:
 
         # check if the file is still the same like in the session state
         # -> file is always transformed to data frame of the code
-        if st.session_state.tab1_imported_file_name != tab2_uploaded_file.name:
-            # file name changed -> new generation
-            st.session_state.tab1_generation_done = False
+        if st.session_state.tab2_imported_file_name != tab2_uploaded_file.name:
+            # file name changed -> new generation, alte Ergebnisse verwerfen
+            st.session_state.tab2_generation_done = False
+            st.session_state.tab2_df_output_data = None
+            st.session_state.tab2_timing = None
 
         try:
             # CSV einlesen
@@ -1414,7 +1416,6 @@ with tab3:
         except Exception as e:
             st.error(f"Fehler beim Laden der Datei: {e}")
             st.stop()
-
 
     # Button to manually reload the file
     if st.button("🔄 Neu laden", key="tab3_reload"):
