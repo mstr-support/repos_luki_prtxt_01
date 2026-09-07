@@ -1314,7 +1314,8 @@ with tab2:
                             {"role": "system", "content": "Du überarbeitest Produkttexte sorgfältig auf Deutsch."},
                             {"role": "user",   "content": div_prompt}
                         ],
-                        temperature=0.7
+                        temperature=0.7,
+                        response_format={"type": "json_object"}
                     )
 
                     #st.write(div_response)
@@ -1323,24 +1324,33 @@ with tab2:
                     # the adapted Produkttexte                    
                     raw    = div_response.choices[0].message.content
                     clean  = re.sub(r"```json|```", "", raw).strip()
-                    parsed = json.loads(clean)
 
-                    
-                    # write back adapted Produkttexte to
-                    # output data
-                    for i, idx in enumerate(indices[0:]):
-                        key = str(i + 1)
-                        if key in parsed:
 
-                            # write back new Produkttext
-                            tab2_df_output_data.loc[idx, "Produkttext_SEO"] = fnct_ptxt(parsed[key])
+                    try:
+                        parsed = json.loads(clean)
 
-                            # prompt tokens get devided by the number of Artikelvariante per Modell
-                            tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
-                            tab2_df_output_data.loc[idx, "Completion_Tokens"]  += div_response.usage.completion_tokens // len(prueflinge)
+                        if not isinstance(parsed, dict):
+                            raise ValueError("Antwort ist kein JSON-Objekt")
 
-                            # update length 
-                            tab2_df_output_data.loc[idx, "Länge()"] = len(parsed[key])
+                        # write back adapted Produkttexte to
+                        # output data
+                        for i, idx in enumerate(indices[0:]):
+                            key = str(i + 1)
+                            if key in parsed:
+    
+                                # write back new Produkttext
+                                tab2_df_output_data.loc[idx, "Produkttext_SEO"] = fnct_ptxt(parsed[key])
+    
+                                # prompt tokens get devided by the number of Artikelvariante per Modell
+                                tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
+                                tab2_df_output_data.loc[idx, "Completion_Tokens"]  += div_response.usage.completion_tokens // len(prueflinge)
+    
+                                # update length 
+                                tab2_df_output_data.loc[idx, "Länge()"] = len(parsed[key])
+
+
+                    except Exception as e:
+                        st.error({"Modell": modell, "Fehler": str(e)})                                    
                     
 
             tab2_step2_elapsed = time.perf_counter() - tab2_step2_start
