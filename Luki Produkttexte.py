@@ -1286,7 +1286,7 @@ with tab2:
                     indices  = gruppe.index.tolist()                   
 
                     # get all produkttexte in a list
-                    prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext"]                                  
+                    prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext_SEO"]                                  
                                     for i, idx in enumerate(indices[0:])}                   
                     
 
@@ -1296,7 +1296,7 @@ with tab2:
                         f"Prüfling {str(i+1)}:\n"
                         f"Farbe: {str(tab2_df_output_data.loc[idx, 'Farbe_Suche1']).strip()}\n"
                         f"Material: {str(tab2_df_output_data.loc[idx, 'MatArt_Obermaterial']).strip()}\n"
-                        f"Text: {tab2_df_output_data.loc[idx, 'Produkttext']}"
+                        f"Text: {tab2_df_output_data.loc[idx, 'Produkttext_SEO']}"
                         for i, idx in enumerate(indices[0:])
                     )
 
