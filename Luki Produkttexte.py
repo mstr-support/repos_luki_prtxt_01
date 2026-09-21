@@ -1203,8 +1203,6 @@ with tab2:
                 for tab2_step1_i, idx in enumerate(tab2_df_org_data.index, start=1):
 
                     cnt_loop_1 = cnt_loop_1 + 1
-                    st.write("loop 1:", cnt_loop_1)
-
                     st.session_state.cnt_loop_1 = cnt_loop_1
 
                     
@@ -1285,8 +1283,6 @@ with tab2:
                 for modell, gruppe in tab2_df_output_data.groupby("Modell", sort=False):
 
                     cnt_loop_2 = cnt_loop_2 + 1
-                    st.write("loop 2:", cnt_loop_2)
-
                     st.session_state.cnt_loop_2 = cnt_loop_2
                     
                     # only re-check text, if there are minimum
@@ -1380,10 +1376,10 @@ with tab2:
             st.session_state.tab2_generation_done = True
 
             if "cnt_loop_1" in st.session_state:
-                st.write('loop 1',st.session_state.cnt_loop_1)
+                st.write('final loop 1',st.session_state.cnt_loop_1)
 
             if "cnt_loop_2" in st.session_state:
-                st.write('loop 2',st.session_state.cnt_loop_2)
+                st.write('final loop 2',st.session_state.cnt_loop_2)
 
         if tab2_df_output_data is not None:
             st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
