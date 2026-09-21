@@ -1174,10 +1174,10 @@ with tab2:
         # show data frame
         st.dataframe(tab2_df_org_data)
 
-        if st.session_state.cnt_loop_1:
+        if "cnt_loop_1" in st.session_state:
              st.write('loop 1',st.session_state.cnt_loop_1)
 
-        if st.session_state.cnt_loop_2:
+        if "cnt_loop_2" in st.session_state:
             st.write('loop 2',st.session_state.cnt_loop_2)
 
 
