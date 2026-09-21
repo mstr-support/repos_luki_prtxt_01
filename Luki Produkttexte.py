@@ -1213,9 +1213,7 @@ with tab2:
 
                     st.session_state.cnt_loop_1 = cnt_loop_1
 
-                    if st.
-                    st.write("loop 1 final",  st.session_state.cnt_loop_1)
-
+                    
                     tab2_step1_progress.text(f"SEO-Text pro Artikelvariante: {tab2_step1_i} von {tab2_step1_total}")
 
                     original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
