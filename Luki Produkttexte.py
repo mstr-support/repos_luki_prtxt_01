@@ -1174,6 +1174,12 @@ with tab2:
         # show data frame
         st.dataframe(tab2_df_org_data)
 
+        if st.session_state.cnt_loop_1:
+                    st.write('loop 1',st.session_state.cnt_loop_1)
+
+        if st.session_state.cnt_loop_2:
+            st.write('loop 2',st.session_state.cnt_loop_2)
+
 
         if st.session_state.tab2_generation_done:
             tab2_df_output_data = st.session_state.tab2_df_output_data
@@ -1204,6 +1210,11 @@ with tab2:
 
                     cnt_loop_1 = cnt_loop_1 + 1
                     st.write("loop 1:", cnt_loop_1)
+
+                    st.session_state.cnt_loop_1 = cnt_loop_1
+
+                    if st.
+                    st.write("loop 1 final",  st.session_state.cnt_loop_1)
 
                     tab2_step1_progress.text(f"SEO-Text pro Artikelvariante: {tab2_step1_i} von {tab2_step1_total}")
 
@@ -1284,6 +1295,8 @@ with tab2:
                     cnt_loop_2 = cnt_loop_2 + 1
                     st.write("loop 2:", cnt_loop_2)
 
+                    st.session_state.cnt_loop_2 = cnt_loop_2
+                    
                     # only re-check text, if there are minimum
                     # 2 article variants per model
                     if len(gruppe) < 2:
