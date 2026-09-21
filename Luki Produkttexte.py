@@ -1182,6 +1182,9 @@ with tab2:
 
         if st.button("SEO-Texte generieren", key="seo_generate_button"):
 
+            cnt_loop_1 = 0
+            cnt_loop_2 = 0                        
+
             client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
             tab2_output_rows = []
 
@@ -1198,6 +1201,9 @@ with tab2:
             tab2_step1_progress = st.empty()
             with st.spinner("SEO-Optimierung läuft pro Artikelvariante...", show_time=True):
                 for tab2_step1_i, idx in enumerate(tab2_df_org_data.index, start=1):
+
+                    cnt_loop_1 = cnt_loop_1 + 1
+                    st.write("loop 1:", cnt_loop_1)
 
                     tab2_step1_progress.text(f"SEO-Text pro Artikelvariante: {tab2_step1_i} von {tab2_step1_total}")
 
@@ -1275,6 +1281,9 @@ with tab2:
                 # loop over model combinations
                 for modell, gruppe in tab2_df_output_data.groupby("Modell", sort=False):
 
+                    cnt_loop_2 = cnt_loop_2 + 1
+                    st.write("loop 2:", cnt_loop_2)
+
                     # only re-check text, if there are minimum
                     # 2 article variants per model
                     if len(gruppe) < 2:
@@ -1306,7 +1315,7 @@ with tab2:
                         f"{pruefling_block}"
                     )
 
-                    st.write(div_prompt)
+                    #st.write(div_prompt)
 
                     div_response = client.chat.completions.create(
                         model=gpts_modl,
