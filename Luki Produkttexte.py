@@ -1178,7 +1178,11 @@ with tab2:
         if st.session_state.tab2_generation_done:
             tab2_df_output_data = st.session_state.tab2_df_output_data
         
-       
+        if "cnt_loop_1" in st.session_state:
+                        st.write('final loop 1',st.session_state.cnt_loop_1)
+        
+        if "cnt_loop_2" in st.session_state:
+            st.write('final loop 2',st.session_state.cnt_loop_2)
 
         if st.button("SEO-Texte generieren", key="seo_generate_button"):
 
@@ -1375,11 +1379,6 @@ with tab2:
             st.session_state.tab2_timing = tab2_timing_records
             st.session_state.tab2_generation_done = True
 
-            if "cnt_loop_1" in st.session_state:
-                st.write('final loop 1',st.session_state.cnt_loop_1)
-
-            if "cnt_loop_2" in st.session_state:
-                st.write('final loop 2',st.session_state.cnt_loop_2)
 
         if tab2_df_output_data is not None:
             st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
