@@ -135,7 +135,7 @@ tab1_required_columns = [
     "Geschlecht", "Produkttyp OS", "Verschluss",
     "Schuhweite", "Membrane", "Laufsohle",
     "Absatzart", "Form Schuhspitze", "Nachhaltigkeit",
-    "Wechselfußbett", "Decksohle", "Futtermaterial", "Futter Detail", "Zertifikate",
+    "Wechselfußbett", "Decksohle", "Futtermaterial", "Zertifikate",
     "Besonderheiten",
     ]
 
