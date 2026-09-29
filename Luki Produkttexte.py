@@ -15,6 +15,8 @@ from azure.storage.blob import BlobClient
 
 #helper functions
 # add helper functions if needed
+import helper.luki_prtxt_fcts as fcts
+import helper.luki_prtxt_prompts as prompts
 
 
 st.set_page_config(
@@ -33,102 +35,14 @@ st.set_page_config(
 #gpts_modl = "gpt-5.4-mini"
 gpts_modl = "gpt-5.4"
 
-#
-# Prompt definitions
 
-# input prompt -> can be dynamic in the future with a text box
-inpt_prmt = (
-	"Du bist ein erfahrener Werbetexter mit Spezialisierung auf Schuhe."
-    "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
-    "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
-	"Der erste Satz muss Produktname und Produkttyp enthalten."
-    "Produktname + Produkttyp immer mit Artikel (zB Der Sneaker XXX, die Hausschuhe YYY)."
-    "Füge manchmal auch das Geschlecht zum Produkttyp, zB Herrensneaker, Damenschuh."
-	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
-    "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
-    "Wenn das Attribut Besonderheiten befüllt ist, erwähne dieses Feature ebenfalls im Produkttext."
-	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
-    "Achte auf eine natürliche, menschlich klingende Sprache."
-    "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
-    "Halte die Textlänge zwischen 500-550 Zeichen, erwähne nie das Wort Leisten."
-    "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben."
-)
 
-# input prompt for kids (Superfit)
-inpt_prmt_kids = (
-	"Du bist ein erfahrener Werbetexter mit Spezialisierung auf Kinderschuhe."
-    "Du erhältst Textvorlagen sowie strukturierte Produktattribute."
-    "Verwende die Leistenbeschreibung und die Modellbeschreibung als zentrale Grundlage."
-	"Der erste Satz muss Produktname und Produkttyp enthalten."
-    "Produktname + Produkttyp immer mit Artikel (zB Der Sneaker XXX, die Hausschuhe YYY)."
-    "Füge manchmal auch das Geschlecht zum Produkttyp, zB Jungensandale, Mädchenschuh."
-	"Ergänze nur befüllte, relevante Attribute; es dürfen keine Inhalte erfunden werden."
-    "Wenn vorhanden, erwähne die Laufsohleneigenschaften und die Aspekte der Nachhaltigkeit."
-    "Wenn das Attribut Besonderheiten befüllt ist, erwähne dieses Feature ebenfalls im Produkttext."
-	"Schreibe in flüssigem, natürlichem Deutsch ohne Aufzählungen."
-    "Achte auf eine natürliche, menschlich klingende Sprache die für die Zielgruppe Kinder optimiert ist."
-    "Vermeide Aufzählungen, Wortwiederholungen, übermäßig werbliche Floskeln und direkte persönliche Ansprache."
-    "Halte die Textlänge zwischen 500-550 Zeichen, erwähne nie das Wort Leisten."
-    "Beachte korrekte Rechtschreibung und flüssigen Satzbau. Leistenname immer in Großbuchstaben."
-)
-
-# Prompt for product text review
-inpt_prmt_review = (
-    "Verbessere im folgenden Text Rechtschreib- und Grammatikfehler."
-    "Verkürze den Text auf circa 450 Zeichen"
-    "Ersetze Wortwiederholungen, ohne den Inhalt zu verändern."
-    "Füge am Ende einen kurzen werbehaften Abschlusssatz hinzu, siehe Beispieltext."
-    "Gib ausschließlich den überarbeiteten Text zurück, ohne zusätzliche Erklärungen oder Kommentare."
-    "Hier ein Beispieltext: Ganz schön raffiniert, bewegt man sich mit der Sandale MOVE durch den Sommer. "
-    "Dezente Schmuckelemente an den Riemenenden, in Kombination mit dem naturgemilltem Nappaleder sorgen bei "
-    "dem legero Schuh für einen feinen und modernen Look. Die besonders weiche, flexible und superleichte PU-Sohle "
-    "mit dem markanten Profil macht MOVE so luftig und flexibel. Damit stellt sich das Sommergefühl ganz leicht ein. "      
-)
-
-# Prompt for SEO optimization
-
-# prompt for step 1
-
-inpt_prmt_seo_1 = (
-    "Aufgabe: Du erhälst einen Produkttext, der für ein Modell komplett gleich ist."
-    "Erzeuge auf Basis der zusätzlichen Informationen einen Text für eine einzelne Artikelvariante."
-)
-
-# prompt for step 2
-
-inpt_prmt_seo_2 = (
-    "Aufgabe: Vergleiche einen Ausgangstext mit einem oder mehreren zu prüfenden Produkttexten. "
-    "Überarbeite jeden Prüfling so, dass er sprachlich korrekt, verkaufsstark und eigenständig formuliert ist. "
-    "Regeln: Prüfe jeden Text auf identische oder zu nah übernommene Formulierungen aus dem Ausgangstext. "
-    "Prüfe zusätzlich, ob sich die Prüflinge untereinander zu ähnlich klingen. "
-    "Inhalte dürfen ähnlich sein, Formulierungen nicht. "
-    "Formuliere gleiche Satzanfänge, Schlusssätze, Nutzenargumente und Standardphrasen abwechslungsreich um. "
-    "Erhalte alle sachlichen Produktinformationen des jeweiligen Textes. "
-    "Behalte die SEO- und GEO-Optimierung der Texte bei. "
-    "Erfinde keine neuen Eigenschaften. "
-    "Korrigiere Grammatik, Rechtschreibung und Zeichensetzung wenn notwendig. "
-    # LEG-263 - Add prompt information to add additional sentence for product variants.
-    "Jeder Prüfling enthält Angaben zu Farbe und Material seiner Artikelvariante. "
-    "Ergänze am Ende jedes Textes einen Satz, der auf weitere Farb- und Materialvarianten des Modells hinweist. "
-    "Verwende dafür ausschließlich die Farben und Materialien der jeweils ANDEREN Prüflinge, niemals die eigene. "
-    "Nenne maximal drei weitere Varianten. "
-    "Nenne das Material nur dann, wenn es vom Material der eigenen Variante abweicht. "
-    "Formuliere diesen Satz für jeden Prüfling unterschiedlich. Beispiele: "
-    "'Der TANARO 5.0 in der Farbe Offwhite aus hochwertigem Nappaleder ist außerdem in zahlreichen weiteren "
-    "Farb- und Materialvarianten erhältlich, darunter Aluminio aus Nubukleder, Tasso aus Nubukleder sowie Zebra aus Effektleder.' "
-    "'Der TANARO 5.0 überzeugt in dieser Variante in der Farbe Offwhite aus Nappaleder und ist zusätzlich in vielen "
-    "weiteren Farben und Materialien erhältlich, darunter Aluminio und Tasso aus Nubukleder sowie Zebra aus Effektleder.' "
-    "Gibt es nur einen einzigen Prüfling, füge keinen solchen Satz hinzu. "
-    #
-    "Jeder finale Text soll mindestens 550 Zeichen inklusive Leerzeichen haben. "
-    "Gib ausschließlich die überarbeiteten Texte als JSON zurück. Keine Analyse. Keine Erklärungen. "
-    "Format: {\"1\": \"text prüfling 1\", \"2\": \"text prüfling 2\", ...}"
-)
 
 
 #
 # columns, of the Excel file
 #
+
 tab1_required_columns = [
     "Marke", "Gruppe", "Saison", "Modellnr", "Leistenbeschreibung", "Modellbeschreibung",
     "Produkttext", 
@@ -169,234 +83,6 @@ selling_point_checks = [
     {"attr1": "Verschluss",          "attr2": None}
 ]
 
-#
-# fixed replacement for speficif values
-
-#Funktion für Geschlecht
-def fnct_gesl(marke: str, geschlecht: str) -> str:
-    if pd.isna(geschlecht):
-        return geschlecht
-    if str(marke).strip().lower() == "superfit":
-        g = str(geschlecht).strip().lower()
-        if g == "weiblich":
-            return "Mädchen"
-        elif g == "männlich":
-            return "Junge"
-    return geschlecht
-
-#Funktion für Produkttyp
-def fnct_ptyp(text: str) -> str:
-    if pd.isna(text):
-        return text
-    text = str(text).strip()
-    if "sneaker" in text.lower():
-        return "Sneaker"
-    if text.lower() == "ancle boot":
-        return "Stiefelette"
-    return text
-
-#Funktion Verschluss
-def fnct_vrsl(text: str) -> str:
-    if pd.isna(text):
-        return text
-    text = str(text).strip().lower()
-    # Ausschließen bestimmter Begriffe
-    if "schlupfschuh" in text or "kein verschluss" in text or "offen" in text:
-        return ""
-    # Immer '/' durch 'zusätzlich' ersetzen
-    if "/" in text:
-        text = text.replace("/", " zusätzlich ")
-    # Ersten Buchstaben groß für konsistente Formatierung
-    return text.capitalize()
-
-#Funktion Profil Laufsohle
-def fnct_pfls(text: str) -> str:
-    if pd.isna(text):
-        return None
-    text = str(text).strip().lower()
-    if text == "stark ausgeprägtes profil":
-        return "Stark ausgeprägtes Profil"
-    return None
-
-#Funktion laufsohleneigenschaft erzeugen
-def fnct_lfso(saison: str, laufsohle: str, marke: str) -> str:
-    if pd.isna(laufsohle):
-        return laufsohle
-    # Sommersaison
-    if str(saison).strip().upper().startswith("FS"):
-
-        #Marke unterscheiden
-        if str(marke).strip().upper().startswith("SUPERFIT"):
-
-            # Laufsohle unterscheiden
-            if str(laufsohle).strip().upper().startswith("PU"):
-                return "Leicht, rutschhemmend, flexibel: die PU-Laufsohle"
-            
-            elif str(laufsohle).strip().upper().startswith("TPU"):
-                return "Leicht, rutschhemmend, flexibel: die TPU-Laufsohle"
-
-            elif str(laufsohle).strip().upper().startswith("TPR"):
-                return "rutschhemmend, flexibel"
-            
-            elif str(laufsohle).strip().upper().startswith("GUMMI"):
-                return "Dämpft jeden Schritt: die Sohle aus Gummi"
-            
-            elif str(laufsohle).strip().upper().startswith("PVC"):
-                return "nicht abfärbend, flexibel, leicht"
-            
-            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
-                return "aus nachwachsendem Rohstoff, flexibel, natürliche Abrollbewegung"
-            
-            elif str(laufsohle).strip().upper().startswith("EVA"):
-                return "Leicht, flexibel und dämpfend: die Sohle aus EVA"
-            
-            elif str(laufsohle).strip().upper().startswith("PHYLON"):
-                return "sehr leicht, flexibel, hoher Tragekomfort"
-            
-            else:
-                return ""
-            
-        elif str(marke).strip().upper().startswith("LEGERO"):
-
-            # Laufsohle unterscheiden
-            if str(laufsohle).strip().upper().startswith("PU"):
-                return "flexibel, leicht, hoher Tragekomfort"
-            
-            elif str(laufsohle).strip().upper().startswith("TPU"):
-                return "optimaler Grip, rutschhemmend, abriebfest"
-            
-            else:
-                return ""
-
-        elif str(marke).strip().upper().startswith("THINK"):
-
-            # Laufsohle unterscheiden
-            if str(laufsohle).strip().upper().startswith("PU"):
-                return "leicht, stoßabsorbierend, dämpfend"
-            
-            elif str(laufsohle).strip().upper().startswith("TPU"):
-                return "elastisch, abriebfest, stabil"
-            
-            elif str(laufsohle).strip().upper().startswith("GUMMI"):
-                return "flexibel, abriebfest, rutschhemmend"
-            
-            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
-                return "dämpfend, flexibel, aus nachwachsendem Rohstoff"
-            
-            elif str(laufsohle).strip().upper().startswith("EVA"):
-                return "flexibel, dämpfend, leicht"
-            
-            elif str(laufsohle).strip().upper().startswith("BLOWTECH"):
-                return "dämpfend, leicht, rutschhemmend"
-            
-            elif str(laufsohle).strip().upper().startswith("LIGHT GUM"):
-                return "dämpfend, leicht, rutschhemmend"
-
-            else:
-                return ""
-
-        else:
-            return ""
-    
-    # Wintersaison
-    elif str(saison).strip().upper().startswith("HW"):
-
-        #Marke unterscheiden
-        if str(marke).strip().upper().startswith("SUPERFIT"):
-
-            # Laufsohle unterscheiden
-            if str(laufsohle).strip().upper().startswith("PU"):
-                return "isolierend, rutschhemmend, hoher Tragekomfort"
-            
-            elif str(laufsohle).strip().upper().startswith("TPU"):
-                return "optimaler Grip, rutschhemmend, abriebfest, kälte-und witterungsbeständig"
-
-            elif str(laufsohle).strip().upper().startswith("TPR"):
-                return "rutschhemmend, flexibel"
-            
-            elif str(laufsohle).strip().upper().startswith("GUMMI"):
-                return "abriebfest, rutschhemmend, flexibel"
-            
-            elif str(laufsohle).strip().upper().startswith("PVC"):
-                return "nicht abfärbend, flexibel, leicht"
-            
-            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
-                return "aus nachwachsendem Rohstoff, flexibel, natürliche Abrollbewegung"
-            
-            elif str(laufsohle).strip().upper().startswith("EVA"):
-                return "sehr leicht, Flexibilität auch bei Kälte, hoher Tragekomfort"
-            
-            elif str(laufsohle).strip().upper().startswith("PHYLON"):
-                return "sehr leicht, Flexibilität auch bei Kälte, hoher Tragekomfort"
-            
-            else:
-                return ""
-            
-        elif str(marke).strip().upper().startswith("LEGERO"):
-
-            # Laufsohle unterscheiden
-            if str(laufsohle).strip().upper().startswith("PU"):
-                return "flexibel, leicht, hoher Tragekomfort, rutschhemmend"
-            
-            elif str(laufsohle).strip().upper().startswith("TPU"):
-                return "optimaler Grip, rutschhemmend, abriebfest, kälte-und witterungsbeständig"
-            
-            else:
-                return ""
-
-        elif str(marke).strip().upper().startswith("THINK"):
-
-            # Laufsohle unterscheiden
-            if str(laufsohle).strip().upper().startswith("PU"):
-                return "leicht, stoßabsorbierend, dämpfend"
-            
-            elif str(laufsohle).strip().upper().startswith("TPU"):
-                return "elastisch, abriebfest, stabil"
-            
-            elif str(laufsohle).strip().upper().startswith("GUMMI"):
-                return "flexibel, abriebfest, rutschhemmend"
-            
-            elif str(laufsohle).strip().upper().startswith("NATURLATEX"):
-                return "dämpfend, flexibel, aus nachwachsendem Rohstoff"
-            
-            elif str(laufsohle).strip().upper().startswith("EVA"):
-                return "flexibel, dämpfend, leicht"
-            
-            elif str(laufsohle).strip().upper().startswith("BLOWTECH"):
-                return "dämpfend, leicht, rutschhemmend"
-            
-            elif str(laufsohle).strip().upper().startswith("LIGHT GUM"):
-                return "dämpfend, leicht, rutschhemmend"
-
-            else:
-                ## Leersting, wenn keine Auswahl zutrifft
-                return ""
-
-        else:
-            ## Leersting, wenn keine Auswahl zutrifft
-            return ""
-        
-    else:
-        ## Leersting, wenn keine Auswahl zutrifft
-        return ""
-
-
-#Funktion Wechselfußbett
-def fnct_wfub(wert: str) -> str:
-    return "Einlegesohle wechselbar" if wert.lower() == "ja" else "nicht erwähnen"
-
-#Funktion Produkttext
-def fnct_ptxt(text: str) -> str:
-
-    # Gore-Tex nur ersetzen, wenn es noch nicht korrekt ist
-    if "gore-tex®" not in text.lower():
-        text = re.sub(r"gore[\s-]?tex", "GORE-TEX®", text, flags=re.IGNORECASE)
-
-    # Diese Anpassungen immer durchführen
-    text = text.replace("Außenzip", "Außenzipp")
-    text = text.replace("Damen-Schuh", "Damenschuh")
-
-    return text
 
 
 #
@@ -575,7 +261,9 @@ def load_artv_data():
 
 st.title("[LUKI] Produkttexte")
 
-tab1, tab2, tab3 = st.tabs(["Produkttexte", "SEO-Optimierung","Selling Points Config"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Produkttexte", "Produkttexte-Übersetzungen" 
+                                        "SEO-Optimierung", "SEO-Übersetzungen"
+                                        "Selling Points Config"])
 
 
 #
@@ -756,17 +444,17 @@ with tab1:
                             "Produktname": tab1_df_org_data.loc[rows_indx, "Gruppe"],
                             "Leistenbeschreibung": tab1_df_org_data.loc[rows_indx, "Leistenbeschreibung"],                             
                             "Modellbeschreibung": tab1_df_org_data.loc[rows_indx, "Modellbeschreibung"],     
-                            "Produkttyp": fnct_ptyp(tab1_df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
-                            "Geschlecht": fnct_gesl(tab1_df_org_data.loc[rows_indx, "Marke"], tab1_df_org_data.loc[rows_indx, "Geschlecht"]),
-                            "Verschluss": fnct_vrsl(tab1_df_org_data.loc[rows_indx, "Verschluss"]),
-                            "Laufsohleneigenschaften": fnct_lfso(tab1_df_org_data.loc[rows_indx, "Saison"], tab1_df_org_data.loc[rows_indx, "Laufsohle"], tab1_df_org_data.loc[rows_indx, "Marke"]),
+                            "Produkttyp": fcts.fnct_ptyp(tab1_df_org_data.loc[rows_indx, "Produkttyp OS"]),                            
+                            "Geschlecht": fcts.fnct_gesl(tab1_df_org_data.loc[rows_indx, "Marke"], tab1_df_org_data.loc[rows_indx, "Geschlecht"]),
+                            "Verschluss": fcts.fnct_vrsl(tab1_df_org_data.loc[rows_indx, "Verschluss"]),
+                            "Laufsohleneigenschaften": fcts.fnct_lfso(tab1_df_org_data.loc[rows_indx, "Saison"], tab1_df_org_data.loc[rows_indx, "Laufsohle"], tab1_df_org_data.loc[rows_indx, "Marke"]),
                             #"Profil Laufsohle": fnct_pfls(dafr_inpt.loc[rows_indx, "Profil Laufsohle"]),
 
                             "Nachhaltigkeit": tab1_df_org_data.loc[rows_indx, "Nachhaltigkeit"],
                             "Membrane": tab1_df_org_data.loc[rows_indx, "Membrane"],
                             "Futtermaterial": tab1_df_org_data.loc[rows_indx, "Futtermaterial"],                        
                             "Schuhweite": tab1_df_org_data.loc[rows_indx, "Schuhweite"],   
-                            "Einlegesohle": fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"]),
+                            "Einlegesohle": fcts.fnct_wfub(tab1_df_org_data.loc[rows_indx, "Wechselfußbett"]),
                             "Besonderheiten": tab1_df_org_data.loc[rows_indx, "Besonderheiten"]
                             
                             # Logic from Leg-258 zurückgebaut - muss raus, wenn das so passt
@@ -810,9 +498,9 @@ with tab1:
                     
                     # choose input prompt based on Marke
                     if marke.startswith("SUPERFIT"):
-                        active_prompt = inpt_prmt_kids
+                        active_prompt = prompts.inpt_prmt_kids
                     else:
-                        active_prompt = inpt_prmt
+                        active_prompt = prompts.inpt_prmt
 
                     final_prompt = f"""
                     {active_prompt}                
@@ -839,7 +527,7 @@ with tab1:
                     text_output = response.choices[0].message.content  
 
                     # Gore Tex in Ergebnis anpassen
-                    text_output = fnct_ptxt(text_output)
+                    text_output = fcts.fnct_ptxt(text_output)
 
                     modl = tab1_df_org_data["Modellnr"].iloc[rows_indx]
                     
@@ -926,7 +614,7 @@ with tab1:
                     original_text = tab1_df_output_data.loc[idx, "Produkttext"]
 
                     review_prompt = f"""
-                    {inpt_prmt_review}
+                    {prompts.inpt_prmt_review}
 
                     Text:
                     {original_text}
@@ -943,7 +631,7 @@ with tab1:
 
                     # Gore Tex in Ergebnis anpassen
                     reviewed_text = review_response.choices[0].message.content
-                    reviewed_text = fnct_ptxt(reviewed_text)
+                    reviewed_text = fcts.fnct_ptxt(reviewed_text)
 
                     # add results to lists
                     reviewed_texts.append(reviewed_text)
@@ -1027,12 +715,33 @@ with tab1:
 
 ####
 # 
-# 2nd Tab for SEO Optimization of Product text
+# 2nd Tab for product text translation - SAT6
 #
 #
 
 
 with tab2:
+
+    with st.expander("Information"):
+                
+
+        st.markdown("""
+            <p>
+            Hier kannst du die englischen Übersetzungen für die Produkttexte erstellern. 
+            Lade dazu die im ersten Reiter erstellte Datei hoch.
+            """, unsafe_allow_html=True)
+
+
+
+
+####
+# 
+# 3rd Tab for SEO Optimization of Product text
+#
+#
+
+
+with tab3:
 
     with st.expander("Information"):
                 
@@ -1051,7 +760,7 @@ with tab2:
 
         # of not yet existing, take default prompt text
         if "tab2_seo_prompt_1" not in st.session_state:
-            st.session_state.tab2_seo_prompt_1 = inpt_prmt_seo_1
+            st.session_state.tab2_seo_prompt_1 = prompts.inpt_prmt_seo_1
 
         st.session_state.tab2_seo_prompt_1 = st.text_area(
                                                         "Prompt",
@@ -1064,7 +773,7 @@ with tab2:
 
         # of not yet existing, take default prompt text
         if "tab2_seo_prompt_2" not in st.session_state:
-            st.session_state.tab2_seo_prompt_2 = inpt_prmt_seo_2
+            st.session_state.tab2_seo_prompt_2 = prompts.inpt_prmt_seo_2
 
         st.session_state.tab2_seo_prompt_2 = st.text_area(
                                                         "Prompt",
@@ -1237,7 +946,7 @@ with tab2:
                     #st.write(seo_response)
 
                     seo_text = seo_response.choices[0].message.content
-                    seo_text = fnct_ptxt(seo_text)
+                    seo_text = fcts.fnct_ptxt(seo_text)
 
                     #st.write(seo_text)                    
 
@@ -1353,7 +1062,7 @@ with tab2:
                             if key in parsed:
     
                                 # write back new Produkttext
-                                tab2_df_output_data.loc[idx, "Produkttext_SEO"] = fnct_ptxt(parsed[key])
+                                tab2_df_output_data.loc[idx, "Produkttext_SEO"] = fcts.fnct_ptxt(parsed[key])
     
                                 # prompt tokens get devided by the number of Artikelvariante per Modell
                                 tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
@@ -1411,13 +1120,38 @@ with tab2:
             )
 
 
+
+
 ####
 # 
-# 3rd Tab for Selling Point Config
+# 4th Tab for SEO text translation - SAT6
 #
 #
 
-with tab3:
+
+with tab4:
+
+    with st.expander("Information"):
+                
+
+        st.markdown("""
+            <p>
+            Hier kannst du die englischen Übersetzungen für die SEO-Texte erstellen. 
+            Lade dazu die im vorigen Reiter erstellte Datei hoch.
+            """, unsafe_allow_html=True)
+
+
+
+
+
+
+####
+# 
+# 5th Tab for Selling Point Config
+#
+#
+
+with tab5:
 
     with st.expander("Information"):
         st.markdown("""
