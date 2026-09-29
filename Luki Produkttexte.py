@@ -96,6 +96,9 @@ selling_point_checks = [
     {"attr1": "Verschluss",          "attr2": None}
 ]
 
+# which SP config column is used for selling point lookup
+SP_TEXT_COL = "Selling Point Text (DE)"
+
 
 
 #
@@ -178,7 +181,7 @@ def fnct_selling_point(
 
     # return first selling point text of filtered dataframe (if there's data)
     if len(df_sp_filtered) > 0:
-        return str(df_sp_filtered.iloc[0]["Selling Point Text"]).strip()
+        return str(df_sp_filtered.iloc[0][SP_TEXT_COL]).strip()
     else:
         return None
 
