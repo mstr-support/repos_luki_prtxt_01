@@ -34,7 +34,7 @@ st.set_page_config(
 # model select -> can be dynamic in the future with a dropbox
 #gpts_modl = "gpt-5.4-mini"
 gpts_modl = "gpt-5.4"
-
+gpts_modl_transl = "gpt-6-luna"   # SAT-6 - model forr translation
 
 
 
@@ -56,7 +56,7 @@ tab1_required_columns = [
 
 # requires columns for SEO Optimization have to be the same
 # as the output file of product text generation
-tab2_required_columns = [    
+tab3_required_columns = [    
     "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",    
     "Produkttext", "Response_ID", "Created_UTC", "Model",
     "Prompt_Tokens", "Completion_Tokens",
@@ -107,10 +107,10 @@ def fnct_selling_point(
     
 
     # load Selling point Excel file if not yet done    
-    if "tab3_df" not in st.session_state:
+    if "tab5_df" not in st.session_state:
         try:
-            tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
-            st.session_state.tab3_df = tab3_df
+            tab5_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            st.session_state.tab5_df = tab5_df
         except Exception as e:
             st.error(f"Fehler beim Laden der Datei: {e}")
             st.stop()
@@ -121,7 +121,7 @@ def fnct_selling_point(
    
 
     # filter selling point data only for relevant rows
-    df_sp = st.session_state.tab3_df[st.session_state.tab3_df["Relevant"].astype(str).str.strip().str.upper() == "J"].copy()
+    df_sp = st.session_state.tab5_df[st.session_state.tab5_df["Relevant"].astype(str).str.strip().str.upper() == "J"].copy()
    
 
     # filter for Marke
@@ -284,14 +284,14 @@ if "tab1_timing" not in st.session_state:
 
 
 # check session variables for SOE , whether a generation was already done
-if "tab2_generation_done" not in st.session_state:
-    st.session_state.tab2_generation_done = False
-if "tab2_df_output_data" not in st.session_state:
-    st.session_state.tab2_df_output_data = None
-if "tab2_imported_file_name" not in st.session_state:
-    st.session_state.tab2_imported_file_name = None
-if "tab2_timing" not in st.session_state:
-    st.session_state.tab2_timing = None
+if "tab3_generation_done" not in st.session_state:
+    st.session_state.tab3_generation_done = False
+if "tab3_df_output_data" not in st.session_state:
+    st.session_state.tab3_df_output_data = None
+if "tab3_imported_file_name" not in st.session_state:
+    st.session_state.tab3_imported_file_name = None
+if "tab3_timing" not in st.session_state:
+    st.session_state.tab3_timing = None
 
 
 # logo on page right
@@ -759,59 +759,59 @@ with tab3:
     with st.expander("Prompt für die SEO-Textgenerierung"):
 
         # of not yet existing, take default prompt text
-        if "tab2_seo_prompt_1" not in st.session_state:
-            st.session_state.tab2_seo_prompt_1 = prompts.inpt_prmt_seo_1
+        if "tab3_seo_prompt_1" not in st.session_state:
+            st.session_state.tab3_seo_prompt_1 = prompts.inpt_prmt_seo_1
 
-        st.session_state.tab2_seo_prompt_1 = st.text_area(
+        st.session_state.tab3_seo_prompt_1 = st.text_area(
                                                         "Prompt",
-                                                        value=st.session_state.tab2_seo_prompt_1,
+                                                        value=st.session_state.tab3_seo_prompt_1,
                                                         height=200,
-                                                        key="tab2_prompt_input_1"
+                                                        key="tab3_prompt_input_1"
                                                     )
         
     with st.expander("Prompt für die Diversifizierung der Texte für die unterschiedlichen Varianten pro Modell"):
 
         # of not yet existing, take default prompt text
-        if "tab2_seo_prompt_2" not in st.session_state:
-            st.session_state.tab2_seo_prompt_2 = prompts.inpt_prmt_seo_2
+        if "tab3_seo_prompt_2" not in st.session_state:
+            st.session_state.tab3_seo_prompt_2 = prompts.inpt_prmt_seo_2
 
-        st.session_state.tab2_seo_prompt_2 = st.text_area(
+        st.session_state.tab3_seo_prompt_2 = st.text_area(
                                                         "Prompt",
-                                                        value=st.session_state.tab2_seo_prompt_2,
+                                                        value=st.session_state.tab3_seo_prompt_2,
                                                         height=200,
-                                                        key="tab2_prompt_input_2"
+                                                        key="tab3_prompt_input_2"
                                                     )
 
     # upoad butte for Excel file
-    tab2_uploaded_file = st.file_uploader("Excel Datei mit generierten Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
+    tab3_uploaded_file = st.file_uploader("Excel Datei mit generierten Produkttexten auswählen", accept_multiple_files=False, type=["xlsx", "xls", "csv"])
 
     # empty data frame for data
-    tab2_df_org_data = None
-    tab2_df_output_data = None
+    tab3_df_org_data = None
+    tab3_df_output_data = None
 
-    if tab2_uploaded_file:
-        st.markdown(f"**Dateiname:** `{tab2_uploaded_file.name}`")
+    if tab3_uploaded_file:
+        st.markdown(f"**Dateiname:** `{tab3_uploaded_file.name}`")
 
         # check if the file is still the same like in the session state
         # -> file is always transformed to data frame of the code
-        if st.session_state.tab2_imported_file_name != tab2_uploaded_file.name:
+        if st.session_state.tab3_imported_file_name != tab3_uploaded_file.name:
             # file name changed -> new generation, alte Ergebnisse verwerfen
-            st.session_state.tab2_generation_done = False
-            st.session_state.tab2_df_output_data = None
-            st.session_state.tab2_timing = None
+            st.session_state.tab3_generation_done = False
+            st.session_state.tab3_df_output_data = None
+            st.session_state.tab3_timing = None
 
         try:
             # CSV einlesen
-            if tab2_uploaded_file.name.lower().endswith(".csv"):
-                tab2_df_org_data = pd.read_csv(tab2_uploaded_file)
+            if tab3_uploaded_file.name.lower().endswith(".csv"):
+                tab3_df_org_data = pd.read_csv(tab3_uploaded_file)
                 st.success("CSV erfolgreich geladen.")
 
             # Read always first sheet of Excelfile
             else:
-                tab2_df_org_data = pd.read_excel(tab2_uploaded_file, sheet_name=0, engine="openpyxl")
+                tab3_df_org_data = pd.read_excel(tab3_uploaded_file, sheet_name=0, engine="openpyxl")
                 st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
 
-            st.session_state.tab2_imported_file_name = tab2_uploaded_file.name       
+            st.session_state.tab3_imported_file_name = tab3_uploaded_file.name       
 
         except Exception as e:
             st.error(f"Fehler beim Einlesen: {e}")
@@ -824,68 +824,69 @@ with tab3:
     # Load automatically Excel file with 
 
 
-    if tab2_df_org_data is not None:
+    if tab3_df_org_data is not None:
 
         # check required columns for input data
-        tab2_col_error = False
-        for col in tab2_required_columns:
-            if col not in tab2_df_org_data.columns:
+        tab3_col_error = False
+        for col in tab3_required_columns:
+            if col not in tab3_df_org_data.columns:
                 st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
-                tab2_col_error = True
+                tab3_col_error = True
 
-        if len(tab2_df_org_data) == 0:
+        if len(tab3_df_org_data) == 0:
             st.error("Die hochgeladene Datei enthält keine Datensätze.")
-            tab2_col_error = True
+            tab3_col_error = True
       
 
 
         # LEG-262
         # Excel file with Artikelvarianten is loaded from Blob and 
+        tab3_df_artv = None
         try:
-            tab2_df_artv = load_artv_data()
+            tab3_df_artv = load_artv_data()
         except Exception as e:
             st.error(f"Fehler beim Laden der Variantendaten aus dem Blob: {e}")
-            tab2_col_error = True
+            tab3_col_error = True
 
-        # check required columns for Artikelvarianten
-        if "Artikelvariante" not in tab2_df_artv.columns:
-            st.error("Spalte 'Artikelmodell' fehlt in den Variantendaten aus dem Blob.")
-            tab2_col_error = True
+        # Spaltenprüfung nur, wenn das Laden geklappt hat
+        if tab3_df_artv is not None and "Artikelvariante" not in tab3_df_artv.columns:
+            st.error("Spalte 'Artikelvariante' fehlt in den Variantendaten aus dem Blob.")
+            tab3_col_error = True
 
-        if tab2_col_error:
+        if tab3_col_error:
             st.stop()
 
         # get join criteria:
         # sample for model - 
         # sample for Artikelvarioante - 
-        tab2_df_artv["Artikelvariante"] = tab2_df_artv["Artikelvariante"].astype(str).str.strip()
-        tab2_df_artv["Modell_Join"] = tab2_df_artv["Artikelvariante"].str.rsplit("-", n=1).str[0]
+        tab3_df_artv["Artikelvariante"] = tab3_df_artv["Artikelvariante"].astype(str).str.strip()
+        tab3_df_artv["Modell_Join"] = tab3_df_artv["Artikelvariante"].str.rsplit("-", n=1).str[0]
 
 
-        tab2_df_org_data = tab2_df_org_data.merge(
-            tab2_df_artv,
+        tab3_df_org_data = tab3_df_org_data.merge(
+            tab3_df_artv,
             how="inner",
             left_on="Modell",
             right_on="Modell_Join"
         )
 
-        if len(tab2_df_org_data) == 0:
+        if len(tab3_df_org_data) == 0:
             st.error("Keine passenden Variantendaten gefunden (Join über Modell/Artikelvariante leer).")
             st.stop()
 
-        st.info(f"{len(tab2_df_org_data)} Artikelvarianten nach Verknüpfung mit Blob-Daten.")
+        st.info(f"{len(tab3_df_org_data)} Artikelvarianten nach Verknüpfung mit Blob-Daten.")
         
         # output for test
-        #st.dataframe(tab2_df_artv)
+        #st.dataframe(tab3_df_artv)
 
        
 
         # show data frame
-        st.dataframe(tab2_df_org_data)
+        st.dataframe(tab3_df_org_data)
 
         
-        if st.session_state.tab2_generation_done:
-            tab2_df_output_data = st.session_state.tab2_df_output_data
+        if st.session_state.tab3_generation_done:
+            tab3_df_output_data = st.session_state.tab3_df_output_data
         
         if "cnt_loop_1" in st.session_state:
                         st.write('final loop 1',st.session_state.cnt_loop_1)
@@ -899,32 +900,32 @@ with tab3:
             cnt_loop_2 = 0                        
 
             client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
-            tab2_output_rows = []
+            tab3_output_rows = []
 
             # Zeitmessung: Ergebnisse pro Schritt werden hier gesammelt
-            tab2_timing_records = []
+            tab3_timing_records = []
 
 
             #
             # step 1: generate SEO text per Artikelvariante
             #
 
-            tab2_step1_start = time.perf_counter()
-            tab2_step1_total = len(tab2_df_org_data.index)
-            tab2_step1_progress = st.empty()
+            tab3_step1_start = time.perf_counter()
+            tab3_step1_total = len(tab3_df_org_data.index)
+            tab3_step1_progress = st.empty()
             with st.spinner("SEO-Optimierung läuft pro Artikelvariante...", show_time=True):
-                for tab2_step1_i, idx in enumerate(tab2_df_org_data.index, start=1):
+                for tab3_step1_i, idx in enumerate(tab3_df_org_data.index, start=1):
 
                     cnt_loop_1 = cnt_loop_1 + 1
                     st.session_state.cnt_loop_1 = cnt_loop_1
 
                     
-                    tab2_step1_progress.text(f"SEO-Text pro Artikelvariante: {tab2_step1_i} von {tab2_step1_total}")
+                    tab3_step1_progress.text(f"SEO-Text pro Artikelvariante: {tab3_step1_i} von {tab3_step1_total}")
 
-                    original_text = str(tab2_df_org_data.loc[idx, "Produkttext"]).strip()
+                    original_text = str(tab3_df_org_data.loc[idx, "Produkttext"]).strip()
                     # add with LEG-259
-                    farbe = str(tab2_df_org_data.loc[idx, "Farbe_Suche1"]).strip()
-                    matart = str(tab2_df_org_data.loc[idx, "MatArt_Obermaterial"]).strip()
+                    farbe = str(tab3_df_org_data.loc[idx, "Farbe_Suche1"]).strip()
+                    matart = str(tab3_df_org_data.loc[idx, "MatArt_Obermaterial"]).strip()
 
                     variant_input = (
                         f"Produkttext: {original_text}\n"
@@ -932,7 +933,7 @@ with tab3:
                         f"Materialart Obermaterial: {matart}"
                     )
 
-                    seo_prompt = f"{st.session_state.tab2_seo_prompt_1}\n\nInput:\n{variant_input}"
+                    seo_prompt = f"{st.session_state.tab3_seo_prompt_1}\n\nInput:\n{variant_input}"
 
                     seo_response = client.chat.completions.create(
                         model=gpts_modl,
@@ -950,17 +951,17 @@ with tab3:
 
                     #st.write(seo_text)                    
 
-                    tab2_output_rows.append({
-                        "Modell":           tab2_df_org_data.loc[idx, "Modell"],
-                        "Saison":           tab2_df_org_data.loc[idx, "Saison"],       # neu
-                        "Marke":            tab2_df_org_data.loc[idx, "Marke"],        # neu
-                        "Gruppe":           tab2_df_org_data.loc[idx, "Gruppe"],       # neu
-                        "Produkttyp":       tab2_df_org_data.loc[idx, "Produkttyp"],   # neu
+                    tab3_output_rows.append({
+                        "Modell":           tab3_df_org_data.loc[idx, "Modell"],
+                        "Saison":           tab3_df_org_data.loc[idx, "Saison"],       # neu
+                        "Marke":            tab3_df_org_data.loc[idx, "Marke"],        # neu
+                        "Gruppe":           tab3_df_org_data.loc[idx, "Gruppe"],       # neu
+                        "Produkttyp":       tab3_df_org_data.loc[idx, "Produkttyp"],   # neu
                         #LEG-263: provide Artikelvariante, Farbe and Material, so that ChatGPT
                         # can add a sentence, that there are other variants of the article
-                        "Artikelvariante":     tab2_df_org_data.loc[idx, "Artikelvariante"],
-                        "Farbe_Suche1":        tab2_df_org_data.loc[idx, "Farbe_Suche1"],
-                        "MatArt_Obermaterial": tab2_df_org_data.loc[idx, "MatArt_Obermaterial"],
+                        "Artikelvariante":     tab3_df_org_data.loc[idx, "Artikelvariante"],
+                        "Farbe_Suche1":        tab3_df_org_data.loc[idx, "Farbe_Suche1"],
+                        "MatArt_Obermaterial": tab3_df_org_data.loc[idx, "MatArt_Obermaterial"],
                         "Produkttext":      original_text,
                         "Produkttext_SEO":  seo_text,
                         "Response_ID":      seo_response.id,
@@ -970,30 +971,30 @@ with tab3:
                         "Completion_Tokens": seo_response.usage.completion_tokens
                     })
 
-            tab2_step1_elapsed = time.perf_counter() - tab2_step1_start
-            tab2_step1_count = len(tab2_output_rows)
-            tab2_timing_records.append({
+            tab3_step1_elapsed = time.perf_counter() - tab3_step1_start
+            tab3_step1_count = len(tab3_output_rows)
+            tab3_timing_records.append({
                 "Schritt": "1. SEO-Text pro Artikelvariante",
-                "Anzahl": tab2_step1_count,
-                "Gesamtzeit (s)": round(tab2_step1_elapsed, 2),
-                "Ø Zeit/Element (s)": round(tab2_step1_elapsed / tab2_step1_count, 2) if tab2_step1_count else 0,
+                "Anzahl": tab3_step1_count,
+                "Gesamtzeit (s)": round(tab3_step1_elapsed, 2),
+                "Ø Zeit/Element (s)": round(tab3_step1_elapsed / tab3_step1_count, 2) if tab3_step1_count else 0,
             })
 
-            tab2_df_output_data = pd.DataFrame(tab2_output_rows)
+            tab3_df_output_data = pd.DataFrame(tab3_output_rows)
 
 
             #
             # step 2: create more divers model text
             #
 
-            tab2_step2_start = time.perf_counter()
-            tab2_step2_count = 0
-            tab2_step2_total = (tab2_df_output_data.groupby("Modell", sort=False).size() >= 2).sum()
-            tab2_step2_progress = st.empty()
+            tab3_step2_start = time.perf_counter()
+            tab3_step2_count = 0
+            tab3_step2_total = (tab3_df_output_data.groupby("Modell", sort=False).size() >= 2).sum()
+            tab3_step2_progress = st.empty()
             with st.spinner("SEO Optimieriung läuft pro Modell", show_time=True):
 
                 # loop over model combinations
-                for modell, gruppe in tab2_df_output_data.groupby("Modell", sort=False):
+                for modell, gruppe in tab3_df_output_data.groupby("Modell", sort=False):
 
                     cnt_loop_2 = cnt_loop_2 + 1
                     st.session_state.cnt_loop_2 = cnt_loop_2
@@ -1003,13 +1004,13 @@ with tab3:
                     if len(gruppe) < 2:
                         continue
 
-                    tab2_step2_count += 1
-                    tab2_step2_progress.text(f"Diversifizierung pro Modell: {tab2_step2_count} von {tab2_step2_total}")
+                    tab3_step2_count += 1
+                    tab3_step2_progress.text(f"Diversifizierung pro Modell: {tab3_step2_count} von {tab3_step2_total}")
 
                     indices  = gruppe.index.tolist()                   
 
                     # get all produkttexte in a list
-                    prueflinge = {str(i+1): tab2_df_output_data.loc[idx, "Produkttext_SEO"]                                  
+                    prueflinge = {str(i+1): tab3_df_output_data.loc[idx, "Produkttext_SEO"]                                  
                                     for i, idx in enumerate(indices[0:])}                   
                     
 
@@ -1017,15 +1018,15 @@ with tab3:
                     # LEG-263 - pass Farbe, Material for text of other variants
                     pruefling_block = "\n\n".join(
                         f"Prüfling {str(i+1)}:\n"
-                        f"Farbe: {str(tab2_df_output_data.loc[idx, 'Farbe_Suche1']).strip()}\n"
-                        f"Material: {str(tab2_df_output_data.loc[idx, 'MatArt_Obermaterial']).strip()}\n"
-                        f"Text: {tab2_df_output_data.loc[idx, 'Produkttext_SEO']}"
+                        f"Farbe: {str(tab3_df_output_data.loc[idx, 'Farbe_Suche1']).strip()}\n"
+                        f"Material: {str(tab3_df_output_data.loc[idx, 'MatArt_Obermaterial']).strip()}\n"
+                        f"Text: {tab3_df_output_data.loc[idx, 'Produkttext_SEO']}"
                         for i, idx in enumerate(indices[0:])
                     )
 
                     # create prompt
                     div_prompt = (
-                        f"{st.session_state.tab2_seo_prompt_2}\n\n"                        
+                        f"{st.session_state.tab3_seo_prompt_2}\n\n"                        
                         f"{pruefling_block}"
                     )
 
@@ -1062,50 +1063,50 @@ with tab3:
                             if key in parsed:
     
                                 # write back new Produkttext
-                                tab2_df_output_data.loc[idx, "Produkttext_SEO"] = fcts.fnct_ptxt(parsed[key])
+                                tab3_df_output_data.loc[idx, "Produkttext_SEO"] = fcts.fnct_ptxt(parsed[key])
     
                                 # prompt tokens get devided by the number of Artikelvariante per Modell
-                                tab2_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
-                                tab2_df_output_data.loc[idx, "Completion_Tokens"]  += div_response.usage.completion_tokens // len(prueflinge)
+                                tab3_df_output_data.loc[idx, "Prompt_Tokens"]      += div_response.usage.prompt_tokens     // len(prueflinge)
+                                tab3_df_output_data.loc[idx, "Completion_Tokens"]  += div_response.usage.completion_tokens // len(prueflinge)
     
                                 # update length 
-                                tab2_df_output_data.loc[idx, "Länge()"] = len(parsed[key])
+                                tab3_df_output_data.loc[idx, "Länge()"] = len(parsed[key])
 
 
                     except Exception as e:
                         st.error({"Modell": modell, "Fehler": str(e)})                                    
                     
 
-            tab2_step2_elapsed = time.perf_counter() - tab2_step2_start
-            tab2_timing_records.append({
+            tab3_step2_elapsed = time.perf_counter() - tab3_step2_start
+            tab3_timing_records.append({
                 "Schritt": "2. Diversifizierung pro Modell",
-                "Anzahl": tab2_step2_count,
-                "Gesamtzeit (s)": round(tab2_step2_elapsed, 2),
-                "Ø Zeit/Element (s)": round(tab2_step2_elapsed / tab2_step2_count, 2) if tab2_step2_count else 0,
+                "Anzahl": tab3_step2_count,
+                "Gesamtzeit (s)": round(tab3_step2_elapsed, 2),
+                "Ø Zeit/Element (s)": round(tab3_step2_elapsed / tab3_step2_count, 2) if tab3_step2_count else 0,
             })
 
-            st.session_state.tab2_df_output_data = tab2_df_output_data
-            st.session_state.tab2_timing = tab2_timing_records
-            st.session_state.tab2_generation_done = True
+            st.session_state.tab3_df_output_data = tab3_df_output_data
+            st.session_state.tab3_timing = tab3_timing_records
+            st.session_state.tab3_generation_done = True
 
 
-        if tab2_df_output_data is not None:
+        if tab3_df_output_data is not None:
             st.success("SEO-optimierte Produkttexte erfolgreich generiert.")
 
             # Zeitmessung anzeigen
-            if st.session_state.tab2_timing:
-                tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
-                if not tab2_timing_df.empty and "Gesamtzeit (s)" in tab2_timing_df.columns:
+            if st.session_state.tab3_timing:
+                tab3_timing_df = pd.DataFrame(st.session_state.tab3_timing)
+                if not tab3_timing_df.empty and "Gesamtzeit (s)" in tab3_timing_df.columns:
                     st.markdown("**Zeitmessung**")
-                    gesamt_zeit = tab2_timing_df["Gesamtzeit (s)"].sum()
-                    st.dataframe(tab2_timing_df, hide_index=True)
+                    gesamt_zeit = tab3_timing_df["Gesamtzeit (s)"].sum()
+                    st.dataframe(tab3_timing_df, hide_index=True)
                     st.caption(f"Gesamtdauer aller Schritte: {round(gesamt_zeit, 2)} Sekunden")
 
-            st.dataframe(tab2_df_output_data)
+            st.dataframe(tab3_df_output_data)
 
             buffer = BytesIO()
             with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-                tab2_df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
+                tab3_df_output_data.to_excel(writer, index=False, sheet_name="Seite1")
             buffer.seek(0)
 
             timestamp = datetime.now().strftime("%Y%m%d")
@@ -1163,49 +1164,49 @@ with tab5:
         """, unsafe_allow_html=True)
 
     # reload counter -> need to reset the content of the data editor, when pressing reload
-    if "tab3_reload_counter" not in st.session_state:
-        st.session_state.tab3_reload_counter = 0
+    if "tab5_reload_counter" not in st.session_state:
+        st.session_state.tab5_reload_counter = 0
 
     # load excel if not yet done
-    if "tab3_df" not in st.session_state:
+    if "tab5_df" not in st.session_state:
         try:
-            tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
-            st.session_state.tab3_df = tab3_df
+            tab5_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            st.session_state.tab5_df = tab5_df
         except Exception as e:
             st.error(f"Fehler beim Laden der Datei: {e}")
             st.stop()
 
     # Button to manually reload the file
-    if st.button("🔄 Neu laden", key="tab3_reload"):
+    if st.button("🔄 Neu laden", key="tab5_reload"):
         try:
             # increase reload counter
-            st.session_state.tab3_reload_counter += 1
+            st.session_state.tab5_reload_counter += 1
 
             # reload excel file
-            tab3_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
-            st.session_state.tab3_df = tab3_df
+            tab5_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+            st.session_state.tab5_df = tab5_df
             st.success("Datei neu geladen.")
 
         except Exception as e:
             st.error(f"Fehler beim Laden: {e}")
 
     # Data Editor - has seperate data frame, which has to be saved
-    tab3_edited_df = st.data_editor(
-        st.session_state.tab3_df,
+    tab5_edited_df = st.data_editor(
+        st.session_state.tab5_df,
         use_container_width=True,
         num_rows="dynamic",
         # reload counter is part of the key, to regenerate data editor
-        key=f"tab3_editor_{st.session_state.tab3_reload_counter}"
+        key=f"tab5_editor_{st.session_state.tab5_reload_counter}"
     )
 
 
     # Save button
-    if st.button("💾 Speichern", key="tab3_save"):
+    if st.button("💾 Speichern", key="tab5_save"):
         try:
             # tranform data frame to Excel byte stream
             buffer = BytesIO()
             with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-                tab3_edited_df.to_excel(writer, index=False, sheet_name="Seite1")
+                tab5_edited_df.to_excel(writer, index=False, sheet_name="Seite1")
             buffer.seek(0)
 
             print('getting SAS token')
@@ -1220,7 +1221,7 @@ with tab5:
             blob_client.upload_blob(buffer, overwrite=True)
 
             # update session state
-            st.session_state.tab3_df = tab3_edited_df
+            st.session_state.tab5_df = tab5_edited_df
             st.success("Datei erfolgreich gespeichert.")
 
         except Exception as e:
