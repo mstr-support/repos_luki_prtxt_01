@@ -66,6 +66,13 @@ tab2_required_columns = [
     ]
 
 
+tab2_output_columns = (
+    ["Modell", "Saison", "Marke", "Gruppe", "Produkttyp"]
+    + [f"{col} ({lang})" for col in tab2_required_columns for lang in ("DE", "EN")]
+    + ["Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens", "Länge()"]
+)
+
+
 
 # requires columns for SEO Optimization have to be the same
 # as the output file of product text generation
