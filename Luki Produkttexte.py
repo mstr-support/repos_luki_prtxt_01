@@ -17,6 +17,7 @@ from azure.storage.blob import BlobClient
 # add helper functions if needed
 import helper.luki_prtxt_fcts as fcts
 import helper.luki_prtxt_prompts as prompts
+import helper.luki_prtxt_helper as helper
 
 
 st.set_page_config(
@@ -52,6 +53,18 @@ tab1_required_columns = [
     "Wechselfußbett", "Decksohle", "Futtermaterial", "Zertifikate",
     "Besonderheiten",
     ]
+
+# requires columns for product text translation
+# as the output file of product text generation
+tab2_required_columns = [    
+    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",    
+    "Produkttext", "Response_ID", "Created_UTC", "Model",
+    "Prompt_Tokens", "Completion_Tokens",
+    # Leg-280
+    "Selling Point 1", "Selling Point 2", "Selling Point 3",
+    "Selling Point 4", "Selling Point 5",    
+    ]
+
 
 
 # requires columns for SEO Optimization have to be the same
@@ -281,6 +294,17 @@ if "tab1_imported_file_name" not in st.session_state:
     st.session_state.tab1_imported_file_name = None
 if "tab1_timing" not in st.session_state:
     st.session_state.tab1_timing = None
+
+
+# check session variables for translation of product texts
+if "tab2_generation_done" not in st.session_state:
+    st.session_state.tab2_generation_done = False
+if "tab2_df_output_data" not in st.session_state:
+    st.session_state.tab2_df_output_data = None
+if "tab2_imported_file_name" not in st.session_state:
+    st.session_state.tab2_imported_file_name = None
+if "tab2_timing" not in st.session_state:
+    st.session_state.tab2_timing = None
 
 
 # check session variables for SOE , whether a generation was already done
@@ -731,6 +755,177 @@ with tab2:
             Lade dazu die im ersten Reiter erstellte Datei hoch.
             """, unsafe_allow_html=True)
 
+    # Upload Produkttext file from 1st tab
+    tab2_uploaded_file = st.file_uploader(
+        "Datei aus dem Reiter „Produkttexte“ hochladen",
+        accept_multiple_files=False,
+        type=["xlsx", "xls", "csv"],
+        key="tab2_uploader"
+    )
+
+    tab2_df_org_data = None
+    tab2_df_output_data = None
+
+    if tab2_uploaded_file:
+        st.markdown(f"**Dateiname:** `{tab2_uploaded_file.name}`")
+
+        # new file -> discard old results
+        if st.session_state.tab2_imported_file_name != tab2_uploaded_file.name:
+            st.session_state.tab2_generation_done = False
+            st.session_state.tab2_df_output_data = None
+            st.session_state.tab2_timing = None
+
+        try:
+            if tab2_uploaded_file.name.lower().endswith(".csv"):
+                tab2_df_org_data = pd.read_csv(tab2_uploaded_file)
+                st.success("CSV erfolgreich geladen.")
+            else:
+                tab2_df_org_data = pd.read_excel(tab2_uploaded_file, sheet_name=0, engine="openpyxl")
+                st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
+
+            st.session_state.tab2_imported_file_name = tab2_uploaded_file.name
+
+        except Exception as e:
+            st.error(f"Fehler beim Einlesen: {e}")
+    else:
+        st.info("Bitte eine Datei hochladen.")
+
+
+    # check if Excel file was readd
+    if tab2_df_org_data is not None:
+
+        # all required columns exist?
+        tab2_col_error = False
+        for col in tab2_required_columns:
+            if col not in tab2_df_org_data.columns:
+                st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
+                tab2_col_error = True
+
+        # there's data in the file
+        if len(tab2_df_org_data) == 0:
+            st.error("Die hochgeladene Datei enthält keine Datensätze.")
+            tab2_col_error = True
+
+
+        if not tab2_col_error:
+
+            st.dataframe(tab2_df_org_data)
+
+            if st.session_state.tab2_generation_done:
+                tab2_df_output_data = st.session_state.tab2_df_output_data
+
+            if st.button("Übersetzungen generieren", key="tab2_translate_button"):
+
+                client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
+                tab2_output_rows = []
+
+                tab2_step1_start = time.perf_counter()
+                tab2_step1_total = len(tab2_df_org_data.index)
+                tab2_step1_progress = st.empty()
+
+                with st.spinner("Produkttexte werden übersetzt...", show_time=True):
+                    for tab2_step1_i, idx in enumerate(tab2_df_org_data.index, start=1):
+
+                        tab2_step1_progress.text(f"Übersetzen: {tab2_step1_i} von {tab2_step1_total}")
+
+                        row = tab2_df_org_data.loc[idx]
+
+                        # collect German texts, empty ones are not translated
+                        de_texts = {
+                            col: ("" if pd.isna(row[col]) else str(row[col]).strip())
+                            for col in tab2_required_columns
+                        }
+                        payload = {k: v for k, v in de_texts.items() if v}
+
+                        en_texts = {col: "" for col in tab2_required_columns}
+                        resp_id = created = model = None
+                        prompt_tokens = completion_tokens = None
+
+                        if payload:
+                            try:
+                                transl_prompt = (
+                                    f"{prompts.inpt_prmt_transl}\n\n"
+                                    "Gib ausschließlich ein JSON-Objekt mit exakt denselben Schlüsseln "
+                                    "wie im Input zurück, die Werte sind die englischen Übersetzungen. "
+                                    "Keine Erklärungen.\n\n"
+                                    f"Input:\n{json.dumps(payload, ensure_ascii=False)}"
+                                )
+
+                                response = client.chat.completions.create(
+                                    model=gpts_modl_transl,
+                                    messages=[
+                                        {"role": "system", "content": "Du übersetzt Produkttexte für Schuhe sorgfältig ins Englische."},
+                                        {"role": "user", "content": transl_prompt}
+                                    ],
+                                    response_format={"type": "json_object"}
+                                )
+
+                                raw = response.choices[0].message.content
+                                parsed = json.loads(re.sub(r"```json|```", "", raw).strip())
+
+                                for col in payload:
+                                    if col in parsed:
+                                        en_texts[col] = str(parsed[col]).strip()
+
+                                resp_id           = response.id
+                                created           = datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S")
+                                model             = response.model
+                                prompt_tokens     = response.usage.prompt_tokens
+                                completion_tokens = response.usage.completion_tokens
+
+                            except Exception as e:
+                                st.error({"Modell": row["Modell"], "Fehler": str(e)})
+
+                        # output row: first 5 columns, DE/EN pairs, then metadata of the new call
+                        out = {}
+                        for col in ["Modell", "Saison", "Marke", "Gruppe", "Produkttyp"]:
+                            out[col] = row[col]
+
+                        for col in tab2_required_columns:
+                            out[f"{col} (DE)"] = de_texts[col]
+                            out[f"{col} (EN)"] = en_texts[col]
+
+                        out["Response_ID"]       = resp_id
+                        out["Created_UTC"]       = created
+                        out["Model"]             = model
+                        out["Prompt_Tokens"]     = prompt_tokens
+                        out["Completion_Tokens"] = completion_tokens
+                        out["Länge()"]           = len(en_texts["Produkttext"])
+
+                        tab2_output_rows.append(out)
+
+                tab2_step1_elapsed = time.perf_counter() - tab2_step1_start
+                tab2_step1_count = len(tab2_output_rows)
+
+                tab2_df_output_data = pd.DataFrame(tab2_output_rows)
+
+                st.session_state.tab2_df_output_data = tab2_df_output_data
+                st.session_state.tab2_timing = [{
+                    "Schritt": "1. Produkttexte übersetzen",
+                    "Anzahl": tab2_step1_count,
+                    "Gesamtzeit (s)": round(tab2_step1_elapsed, 2),
+                    "Ø Zeit/Element (s)": round(tab2_step1_elapsed / tab2_step1_count, 2) if tab2_step1_count else 0,
+                }]
+                st.session_state.tab2_generation_done = True
+
+            if tab2_df_output_data is not None:
+                st.success("Übersetzungen erfolgreich generiert.")
+
+                if st.session_state.tab2_timing:
+                    tab2_timing_df = pd.DataFrame(st.session_state.tab2_timing)
+                    st.markdown("**Zeitmessung**")
+                    st.dataframe(tab2_timing_df, hide_index=True)
+                    st.caption(f"Gesamtdauer: {round(tab2_timing_df['Gesamtzeit (s)'].sum(), 2)} Sekunden")
+
+                st.dataframe(tab2_df_output_data)
+
+                st.download_button(
+                    label="Als Excel herunterladen",
+                    data=helper.fnct_to_excel_bytes(tab2_df_output_data),
+                    file_name=f"Produkttexte_translated_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="tab2_download_button"
+                )
 
 
 

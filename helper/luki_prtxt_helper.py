@@ -1,5 +1,7 @@
 import streamlit as st
-
+from azure.storage.blob import BlobClient
+import pandas as pd
+from io import BytesIO
 
 
 
@@ -18,3 +20,12 @@ def make_grid(cols,rows):
             grid[i] = st.columns(rows)
     return grid
 
+
+
+# Dataframe to Excel File
+def fnct_to_excel_bytes(df: pd.DataFrame) -> BytesIO:
+    buf = BytesIO()
+    with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Seite1")
+    buf.seek(0)
+    return buf
