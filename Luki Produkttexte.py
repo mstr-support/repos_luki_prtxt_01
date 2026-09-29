@@ -847,7 +847,7 @@ with tab2:
                         if payload:
                             try:
                                 transl_prompt = (
-                                    f"{prompts.inpt_prmt_transl}\n\n"
+                                    f"{prompts.inpt_prmt_translation}\n\n"
                                     "Gib ausschließlich ein JSON-Objekt mit exakt denselben Schlüsseln "
                                     "wie im Input zurück, die Werte sind die englischen Übersetzungen. "
                                     "Keine Erklärungen.\n\n"
