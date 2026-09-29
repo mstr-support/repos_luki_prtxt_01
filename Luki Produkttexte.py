@@ -261,8 +261,8 @@ def load_artv_data():
 
 st.title("[LUKI] Produkttexte")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Produkttexte", "Produkttexte-Übersetzungen" 
-                                        "SEO-Optimierung", "SEO-Übersetzungen"
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Produkttexte", "Produkttexte-Übersetzungen",
+                                        "SEO-Optimierung", "SEO-Übersetzungen",
                                         "Selling Points Config"])
 
 
