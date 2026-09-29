@@ -931,6 +931,52 @@ with tab2:
                 )
 
 
+                #
+                # section 2: IPIM import files (from the currently generated data)
+                #
+                st.divider()
+                st.subheader("IPIM-Import-Dateien erstellen")
+                st.markdown(
+                    "Wenn du mit den Übersetzungen zufrieden bist, lade die Datei hier hoch, "
+                    "damit die entsprechenden Importdateien für IPIM erstellt werden."
+                )
+
+                # column mapping per language: column in output -> column in IPIM file
+                ipim_cols_de = {
+                    "Saison": "Saison", "Marke": "Marke", "Gruppe": "Gruppe",
+                    "Modell": "Modellnummer", "Produkttext (DE)": "Haupttext DE",
+                    **{f"Selling Point {i} (DE)": f"Selling Point {i}" for i in range(1, 6)},
+                }
+                ipim_cols_en = {
+                    "Saison": "Saison", "Marke": "Marke", "Gruppe": "Gruppe",
+                    "Modell": "Modellnummer", "Produkttext (EN)": "Haupttext EN",
+                    **{f"Selling Point {i} (EN)": f"Selling Point {i}" for i in range(1, 6)},
+                }
+
+                # only needed columns, in the defined order
+                df_ipim_de = tab2_df_output_data[list(ipim_cols_de)].rename(columns=ipim_cols_de)
+                df_ipim_en = tab2_df_output_data[list(ipim_cols_en)].rename(columns=ipim_cols_en)
+
+                col_de, col_en = st.columns(2)
+                with col_de:
+                    st.download_button(
+                        label="Produkttexte_IPIM_Upload_DE herunterladen",
+                        data=helper.fnct_to_excel_bytes(df_ipim_de),
+                        file_name="Produkttexte_IPIM_Upload_DE.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key="tab2_ipim_download_de"
+                    )
+                with col_en:
+                    st.download_button(
+                        label="Produkttexte_IPIM_Upload_EN herunterladen",
+                        data=helper.fnct_to_excel_bytes(df_ipim_en),
+                        file_name="Produkttexte_IPIM_Upload_EN.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key="tab2_ipim_download_en"
+                    )
+
+
+
 
 ####
 # 
