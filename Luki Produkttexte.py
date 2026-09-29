@@ -65,7 +65,15 @@ tab2_required_columns = [
     "Selling Point 4", "Selling Point 5",    
     ]
 
+SP_TEXT_COL_EN = "Selling Point Text (EN)"
 
+# columns which should be created
+tab2_translate_cols = [
+    "Selling Point 1", "Selling Point 2", "Selling Point 3",
+    "Selling Point 4", "Selling Point 5", "Produkttext",
+]
+
+# output columns for Tab2
 tab2_output_columns = (
     ["Modell", "Saison", "Marke", "Gruppe", "Produkttyp"]
     + [f"{col} ({lang})" for col in tab2_required_columns for lang in ("DE", "EN")]
@@ -255,6 +263,29 @@ def fnct_selling_points(row: pd.Series, marke: str) -> dict:
         results.append("")
 
     return {f"Selling Point {i+1}": results[i] for i in range(5)}
+
+
+# lookup of the English selling point text in the config via the German text
+def fnct_selling_point_en(text_de: str, marke: str = None) -> str:
+
+    df_sp = st.session_state.tab5_df
+
+    if SP_TEXT_COL_EN not in df_sp.columns:
+        return ""
+
+    # same filters as in fnct_selling_point
+    df_sp = df_sp[df_sp["Relevant"].astype(str).str.strip().str.upper() == "J"]
+    marke_str = str(marke).strip().upper()
+    df_sp = df_sp[df_sp["Marke"].astype(str).str.strip().str.upper().isin(["ALLE", marke_str])]
+
+    # match via German text, only rows with an English text
+    df_sp = df_sp[df_sp[SP_TEXT_COL].astype(str).str.strip().str.casefold() == text_de.strip().casefold()]
+    df_sp = df_sp[df_sp[SP_TEXT_COL_EN].notna() & (df_sp[SP_TEXT_COL_EN].astype(str).str.strip() != "")]
+
+    if len(df_sp) > 0:
+        return str(df_sp.iloc[0][SP_TEXT_COL_EN]).strip()
+    return ""
+
 
 
 #
@@ -826,6 +857,12 @@ with tab2:
 
             if st.button("Übersetzungen generieren", key="tab2_translate_button"):
 
+                # load sales point information
+                if "tab5_df" not in st.session_state:
+                    st.session_state.tab5_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
+
+                tab2_sp_missing = 0
+
                 client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
                 tab2_output_rows = []
 
@@ -840,14 +877,23 @@ with tab2:
 
                         row = tab2_df_org_data.loc[idx]
 
-                        # collect German texts, empty ones are not translated
+                        # German texts, only Selling Points and Produkttext
                         de_texts = {
                             col: ("" if pd.isna(row[col]) else str(row[col]).strip())
-                            for col in tab2_required_columns
+                            for col in tab2_translate_cols
                         }
-                        payload = {k: v for k, v in de_texts.items() if v}
+                        en_texts = {col: "" for col in tab2_translate_cols}
 
-                        en_texts = {col: "" for col in tab2_required_columns}
+                        # selling points: English text comes from the config
+                        for col in tab2_translate_cols:
+                            if col.startswith("Selling Point") and de_texts[col]:
+                                en_texts[col] = fnct_selling_point_en(de_texts[col], row["Marke"])
+                                if not en_texts[col]:
+                                    tab2_sp_missing += 1
+
+                        # only the Produkttext is translated via LLM
+                        payload = {"Produkttext": de_texts["Produkttext"]} if de_texts["Produkttext"] else {}
+
                         resp_id = created = model = None
                         prompt_tokens = completion_tokens = None
 
@@ -904,10 +950,19 @@ with tab2:
 
                         tab2_output_rows.append(out)
 
+
+                # check if english translation
+                if tab2_sp_missing > 0:
+                    st.warning(
+                        f"{tab2_sp_missing} Selling Points haben in der Config keinen passenden "
+                        "englischen Text und bleiben leer."
+                    )
+
                 tab2_step1_elapsed = time.perf_counter() - tab2_step1_start
                 tab2_step1_count = len(tab2_output_rows)
 
-                tab2_df_output_data = pd.DataFrame(tab2_output_rows)
+                # only take defined output columns
+                tab2_df_output_data = pd.DataFrame(tab2_output_rows, columns=tab2_output_columns)
 
                 st.session_state.tab2_df_output_data = tab2_df_output_data
                 st.session_state.tab2_timing = [{
@@ -1423,6 +1478,7 @@ with tab5:
         try:
             tab5_df = pd.read_excel(st.secrets["AZURE_BLOB_URL"], engine="openpyxl")
             st.session_state.tab5_df = tab5_df
+            
         except Exception as e:
             st.error(f"Fehler beim Laden der Datei: {e}")
             st.stop()
