@@ -94,6 +94,16 @@ tab3_required_columns = [
     ]
 
 
+# required columns for SEO text translation = output file of the SEO optimization (tab 3)
+tab4_required_columns = [
+    "Modell", "Saison", "Marke", "Gruppe", "Produkttyp",
+    "Artikelvariante", "Farbe_Suche1", "MatArt_Obermaterial",
+    "Produkttext", "Produkttext_SEO",
+    "Response_ID", "Created_UTC", "Model",
+    "Prompt_Tokens", "Completion_Tokens",
+]
+
+
 #
 # priority for selling points config
 # defines which attributes need to be checked for selling points, order defines the priority
@@ -357,6 +367,17 @@ if "tab3_imported_file_name" not in st.session_state:
     st.session_state.tab3_imported_file_name = None
 if "tab3_timing" not in st.session_state:
     st.session_state.tab3_timing = None
+
+
+# check session variables for translation of SEO texts
+if "tab4_generation_done" not in st.session_state:
+    st.session_state.tab4_generation_done = False
+if "tab4_df_output_data" not in st.session_state:
+    st.session_state.tab4_df_output_data = None
+if "tab4_imported_file_name" not in st.session_state:
+    st.session_state.tab4_imported_file_name = None
+if "tab4_timing" not in st.session_state:
+    st.session_state.tab4_timing = None
 
 
 # logo on page right
@@ -1439,14 +1460,190 @@ with tab3:
 with tab4:
 
     with st.expander("Information"):
-                
-
         st.markdown("""
             <p>
-            Hier kannst du die englischen Übersetzungen für die SEO-Texte erstellen. 
+            Hier kannst du die englischen Übersetzungen für die SEO-Texte erstellen.
             Lade dazu die im vorigen Reiter erstellte Datei hoch.
+            </p>
             """, unsafe_allow_html=True)
 
+    tab4_uploaded_file = st.file_uploader(
+        "Datei aus dem Reiter „SEO-Optimierung“ hochladen",
+        accept_multiple_files=False,
+        type=["xlsx", "xls", "csv"],
+        key="tab4_uploader"
+    )
+
+    tab4_df_org_data = None
+    tab4_df_output_data = None
+
+    if tab4_uploaded_file:
+        st.markdown(f"**Dateiname:** `{tab4_uploaded_file.name}`")
+
+        # new file -> discard old results
+        if st.session_state.tab4_imported_file_name != tab4_uploaded_file.name:
+            st.session_state.tab4_generation_done = False
+            st.session_state.tab4_df_output_data = None
+            st.session_state.tab4_timing = None
+
+        try:
+            if tab4_uploaded_file.name.lower().endswith(".csv"):
+                tab4_df_org_data = pd.read_csv(tab4_uploaded_file)
+                st.success("CSV erfolgreich geladen.")
+            else:
+                tab4_df_org_data = pd.read_excel(tab4_uploaded_file, sheet_name=0, engine="openpyxl")
+                st.success("Excel (erstes Tabellenblatt) erfolgreich geladen.")
+
+            st.session_state.tab4_imported_file_name = tab4_uploaded_file.name
+
+        except Exception as e:
+            st.error(f"Fehler beim Einlesen: {e}")
+    else:
+        st.info("Bitte eine Datei hochladen.")
+
+
+    if tab4_df_org_data is not None:
+
+        # all required columns exist?
+        tab4_col_error = False
+        for col in tab4_required_columns:
+            if col not in tab4_df_org_data.columns:
+                st.error("Folgende Spalte fehlt in der Excel-Datei: " + col)
+                tab4_col_error = True
+
+        # there's data in the file
+        if len(tab4_df_org_data) == 0:
+            st.error("Die hochgeladene Datei enthält keine Datensätze.")
+            tab4_col_error = True
+
+        if not tab4_col_error:
+
+            st.dataframe(tab4_df_org_data)
+
+            if st.session_state.tab4_generation_done:
+                tab4_df_output_data = st.session_state.tab4_df_output_data
+
+            if st.button("SEO-Übersetzungen generieren", key="tab4_translate_button"):
+
+                client = OpenAI(api_key=st.secrets["OPAI_KEYS"])
+
+                # results per row, written back to the dataframe after the loop
+                tab4_en_texts          = []
+                tab4_response_ids      = []
+                tab4_created_utc       = []
+                tab4_models            = []
+                tab4_prompt_tokens     = []
+                tab4_completion_tokens = []
+                tab4_errors            = 0
+
+                tab4_step1_start = time.perf_counter()
+                tab4_step1_total = len(tab4_df_org_data.index)
+                tab4_step1_progress = st.empty()
+
+                with st.spinner("SEO-Texte werden übersetzt...", show_time=True):
+                    for tab4_step1_i, idx in enumerate(tab4_df_org_data.index, start=1):
+
+                        tab4_step1_progress.text(f"Übersetzen: {tab4_step1_i} von {tab4_step1_total}")
+
+                        row = tab4_df_org_data.loc[idx]
+
+                        text_de = "" if pd.isna(row["Produkttext_SEO"]) else str(row["Produkttext_SEO"]).strip()
+
+                        text_en = ""
+                        resp_id = created = model = None
+                        prompt_tokens = completion_tokens = None
+
+                        if text_de:
+                            try:
+                                transl_prompt = (
+                                    f"{prompts.inpt_prmt_seo_translation}\n\n"
+                                    "Gib ausschließlich ein JSON-Objekt mit dem Schlüssel "
+                                    "\"Produkttext_SEO\" zurück, der Wert ist die englische Übersetzung. "
+                                    "Keine Erklärungen.\n\n"
+                                    f"Input:\n{json.dumps({'Produkttext_SEO': text_de}, ensure_ascii=False)}"
+                                )
+
+                                response = client.chat.completions.create(
+                                    model=gpts_modl_transl,
+                                    messages=[
+                                        {"role": "system", "content": "Du übersetzt SEO-Produkttexte für Schuhe sorgfältig ins Englische."},
+                                        {"role": "user", "content": transl_prompt}
+                                    ],
+                                    response_format={"type": "json_object"}
+                                )
+
+                                raw = response.choices[0].message.content
+                                parsed = json.loads(re.sub(r"```json|```", "", raw).strip())
+
+                                text_en = str(parsed.get("Produkttext_SEO", "")).strip()
+
+                                resp_id           = response.id
+                                created           = datetime.fromtimestamp(response.created).strftime("%d.%m.%Y %H:%M:%S")
+                                model             = response.model
+                                prompt_tokens     = response.usage.prompt_tokens
+                                completion_tokens = response.usage.completion_tokens
+
+                            except Exception as e:
+                                tab4_errors += 1
+                                st.error({"Modell": row["Modell"], "Artikelvariante": row["Artikelvariante"], "Fehler": str(e)})
+
+                        tab4_en_texts.append(text_en)
+                        tab4_response_ids.append(resp_id)
+                        tab4_created_utc.append(created)
+                        tab4_models.append(model)
+                        tab4_prompt_tokens.append(prompt_tokens)
+                        tab4_completion_tokens.append(completion_tokens)
+
+                tab4_step1_elapsed = time.perf_counter() - tab4_step1_start
+                tab4_step1_count = len(tab4_en_texts)
+
+                # build output: keep all columns, DE columns renamed, EN column right behind the SEO text
+                tab4_df_output_data = tab4_df_org_data.copy().rename(columns={
+                    "Produkttext":     "Produkttext (DE)",
+                    "Produkttext_SEO": "Produkttext_SEO (DE)",
+                })
+
+                tab4_pos = tab4_df_output_data.columns.get_loc("Produkttext_SEO (DE)") + 1
+                tab4_df_output_data.insert(tab4_pos, "Produkttext_SEO (EN)", tab4_en_texts)
+
+                # columns from Response_ID onwards: data of the new call
+                tab4_df_output_data["Response_ID"]       = tab4_response_ids
+                tab4_df_output_data["Created_UTC"]       = tab4_created_utc
+                tab4_df_output_data["Model"]             = tab4_models
+                tab4_df_output_data["Prompt_Tokens"]     = tab4_prompt_tokens
+                tab4_df_output_data["Completion_Tokens"] = tab4_completion_tokens
+                tab4_df_output_data["Länge()"]           = [len(t) for t in tab4_en_texts]
+
+                if tab4_errors > 0:
+                    st.warning(f"{tab4_errors} Texte konnten nicht übersetzt werden und bleiben leer.")
+
+                st.session_state.tab4_df_output_data = tab4_df_output_data
+                st.session_state.tab4_timing = [{
+                    "Schritt": "1. SEO-Texte übersetzen",
+                    "Anzahl": tab4_step1_count,
+                    "Gesamtzeit (s)": round(tab4_step1_elapsed, 2),
+                    "Ø Zeit/Element (s)": round(tab4_step1_elapsed / tab4_step1_count, 2) if tab4_step1_count else 0,
+                }]
+                st.session_state.tab4_generation_done = True
+
+            if tab4_df_output_data is not None:
+                st.success("SEO-Übersetzungen erfolgreich generiert.")
+
+                if st.session_state.tab4_timing:
+                    tab4_timing_df = pd.DataFrame(st.session_state.tab4_timing)
+                    st.markdown("**Zeitmessung**")
+                    st.dataframe(tab4_timing_df, hide_index=True)
+                    st.caption(f"Gesamtdauer: {round(tab4_timing_df['Gesamtzeit (s)'].sum(), 2)} Sekunden")
+
+                st.dataframe(tab4_df_output_data)
+
+                st.download_button(
+                    label="Als Excel herunterladen",
+                    data=helper.fnct_to_excel_bytes(tab4_df_output_data),
+                    file_name=f"Produkttexte_SEO_translated_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="tab4_download_button"
+                )
 
 
 
