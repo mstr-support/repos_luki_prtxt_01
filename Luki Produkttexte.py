@@ -76,7 +76,7 @@ tab2_translate_cols = [
 # output columns for Tab2
 tab2_output_columns = (
     ["Modell", "Saison", "Marke", "Gruppe", "Produkttyp"]
-    + [f"{col} ({lang})" for col in tab2_required_columns for lang in ("DE", "EN")]
+    + [f"{col} ({lang})" for col in tab2_translate_cols for lang in ("DE", "EN")]
     + ["Response_ID", "Created_UTC", "Model", "Prompt_Tokens", "Completion_Tokens", "Länge()"]
 )
 
@@ -937,7 +937,7 @@ with tab2:
                         for col in ["Modell", "Saison", "Marke", "Gruppe", "Produkttyp"]:
                             out[col] = row[col]
 
-                        for col in tab2_required_columns:
+                        for col in tab2_translate_cols:
                             out[f"{col} (DE)"] = de_texts[col]
                             out[f"{col} (EN)"] = en_texts[col]
 
